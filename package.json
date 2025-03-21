@@ -8,6 +8,8 @@
     },
     "scripts": {
       "build": "yarn clean && NODE_ENV=production yarn ts-node node_modules/.bin/webpack",
+      "build-dev": "yarn clean && yarn ts-node node_modules/.bin/webpack",
+      "package": "yarn build && tar -C dist -cvf dist/extension.tar resources",
       "clean": "rm -rf dist"
     },
     "devDependencies": {
