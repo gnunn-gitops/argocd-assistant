@@ -3,7 +3,7 @@
 import { Configuration as WebpackConfiguration } from "webpack";
 import * as path from "path";
 
-const groupKind = '**/*';
+const extName = "lightspeed";
 
 const config: WebpackConfiguration = {
     mode: "development",
@@ -11,10 +11,10 @@ const config: WebpackConfiguration = {
         extension: './src/index.tsx',
     },
     output: {
-        filename: 'extensions.js',
-        path: __dirname + `/dist/resources/${groupKind}/ui`,
+        filename: 'extensions-${extName}.js',
+        path: __dirname + `/dist/resources/extensions-${extName}.js`,
         libraryTarget: 'window',
-        library: ['extensions', 'resources', groupKind],
+        library: ['extensions', 'resources'],
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js', '.json', '.ttf', '.scss']

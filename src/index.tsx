@@ -12,3 +12,7 @@ export const Extension = (props: { tree: Tree; resource: Object }) => {
 };
 
 export const component = Extension;
+
+((window: any) => {
+    window?.extensionsAPI?.registerResourceExtension(component, '**', '*', 'Lightspeed', {icon: 'fa-sharp fa-light fa-bars-progress fa-lg'});
+})(window);
