@@ -1,14 +1,25 @@
 .chat {
     display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: auto min-content;
-    height: 100vh;
-}
-.chat-entry {
-    grid-row: 2;
-}
-.chat-log {
-    grid-row: 1;
+    grid-template-rows: 1fr min-content;
+    height: 100%;
     width: 100%;
-    height: 100%
+}
+
+.chat-log {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 4px;
+}
+
+.chat-entry {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 4px;
+    display: flex;
+    flex-direction:row
+}
+
+.chat-entry input {
+    flex: 1;
+    margin-right: 6px;
 }
