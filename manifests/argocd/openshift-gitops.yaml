@@ -15,7 +15,7 @@ spec:
           allowPrivilegeEscalation: false
         volumeMounts:
           - mountPath: /tmp/extensions/
-            name: extensions
+            name: extension-lightspeed
     insecure: true
     route:
       enabled: true
@@ -24,10 +24,10 @@ spec:
         insecureEdgeTerminationPolicy: Redirect
     volumeMounts:
       - mountPath: /tmp/extensions/
-        name: extensions
+        name: extension-lightspeed
     volumes:
       - emptyDir: {}
-        name: extensions
+        name: extension-lightspeed
   applicationSet:
     resources:
       limits:

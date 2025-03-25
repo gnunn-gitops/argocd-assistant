@@ -13,11 +13,11 @@ spec:
           allowPrivilegeEscalation: false
         volumeMounts:
           - mountPath: /tmp/extensions/
-            name: extensions
+            name: extension-lightspeed
     volumeMounts:
       - mountPath: /tmp/extensions/
-        name: extensions
+        name: extension-lightspeed
     volumes:
       - emptyDir: {}
-        name: extensions
+        name: extension-lightspeed
 ```
