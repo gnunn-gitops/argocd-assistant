@@ -10,6 +10,7 @@
       "build": "yarn clean && NODE_ENV=production yarn ts-node node_modules/.bin/webpack",
       "build-dev": "yarn clean && yarn ts-node node_modules/.bin/webpack",
       "package": "yarn build && tar -C dist -cvf dist/extension-$npm_package_name-$npm_package_version.tar resources",
+      "package-dev": "yarn build-dev && tar -C dist -cvf dist/extension-$npm_package_name-$npm_package_version.tar resources",
       "clean": "rm -rf dist"
     },
     "devDependencies": {
@@ -24,7 +25,8 @@
       "sass-loader": "^13.2.0",
       "style-loader": "^3.3.1",
       "ts-loader": "9.4.2",
-      "ts-node": "^10.8.1"
+      "ts-node": "^10.8.1",
+      "argo-ui": "git+https://github.com/argoproj/argo-ui.git"
     },
     "dependencies": {
       "typescript": "^4.9.3",

@@ -11,8 +11,8 @@ const config: WebpackConfiguration = {
         extension: './src/index.tsx',
     },
     output: {
-        filename: 'extensions-${extName}.js',
-        path: __dirname + `/dist/resources/extensions-${extName}.js`,
+        filename: `extensions-${extName}.js`,
+        path: __dirname + `/dist/resources/extensions-${extName}`,
         libraryTarget: 'window',
         library: ['extensions', 'resources'],
     },
