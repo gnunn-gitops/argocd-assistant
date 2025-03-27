@@ -11,7 +11,7 @@ function getExtensionQueryURL(): string {
 //     return "lightspeed-app-server-openshift-lightspeed" + location.host.substring(location.host.indexOf(".apps"))
 // }
 
-function getHeaders(token: string, application:any): Headers {
+function getHeaders(application:any): Headers {
 
     console.log(application);
 
@@ -20,7 +20,6 @@ function getHeaders(token: string, application:any): Headers {
     const project = application?.spec?.project || "";
 
     const headers: Headers = new Headers({
-        'Authorization': "Bearer " + btoa(token),
         'Content-Type': "application/json",
         'Accept': 'application/json',
         'Origin':'https://' + location.host,
@@ -30,14 +29,14 @@ function getHeaders(token: string, application:any): Headers {
     return headers;
 }
 
-export function submitQuery(query:QueryRequest, token: string, application: any): Promise<QueryResponse> {
+export function submitQuery(query:QueryRequest, application: any): Promise<QueryResponse> {
     //const url: string = PROTOCOL + "://" + getLightSpeedHost() + "/v1/query"
     const url: string = getExtensionQueryURL();
 
     const request: RequestInfo = new Request(url, {
         credentials: 'include',
         method: 'POST',
-        headers: getHeaders(token, application),
+        headers: getHeaders(application),
         body: JSON.stringify(query)
       })
 

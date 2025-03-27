@@ -12,6 +12,9 @@ spec:
       maxIdleConnections: 30
       services:
       - url: https://lightspeed-app-server-openshift-lightspeed.apps.cluster-7wmpw.7wmpw.sandbox1517.opentlc.com
+        headers:
+        - name: Authorization
+          value: '$lightspeed.authorization.token'
   server:
     extraCommandArgs:
       - "--enable-proxy-extension"

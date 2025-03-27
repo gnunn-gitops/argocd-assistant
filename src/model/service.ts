@@ -6,7 +6,7 @@ export enum Model {
     GPT4 = "gpt-4"
 }
 export type QueryRequest = {
-    conversationId: string,
+    conversation_id: string,
     model: Model,
     provider: Provider,
     query: string,

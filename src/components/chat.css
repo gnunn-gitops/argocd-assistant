@@ -20,7 +20,8 @@
     grid-row: 2;
     padding: 4px;
     display: flex;
-    flex-direction:row
+    flex-direction:row;
+    width: 100%;
 }
 
 .chat-entry input {
