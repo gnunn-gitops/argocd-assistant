@@ -4,7 +4,17 @@ metadata:
   name: openshift-gitops
   namespace: openshift-gitops
 spec:
+  extraConfig:
+    extension.config.lightspeed: |
+      connectionTimeout: 2s
+      keepAlive: 15s
+      idleConnectionTimeout: 60s
+      maxIdleConnections: 30
+      services:
+      - url: https://lightspeed-app-server-openshift-lightspeed.apps.cluster-7wmpw.7wmpw.sandbox1517.opentlc.com
   server:
+    extraCommandArgs:
+      - "--enable-proxy-extension"
     initContainers:
       - env:
           - name: EXTENSION_URL
@@ -86,6 +96,7 @@ spec:
     policy: |
       g, system:cluster-admins, role:admin
       g, cluster-admins, role:admin
+      p, role:readonly, extensions, invoke, lightspeed, allow
     scopes: "[groups]"
   redis:
     resources:

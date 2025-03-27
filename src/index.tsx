@@ -1,13 +1,16 @@
 import * as React from "react";
-import { Tree } from "./model/tree";
 import Chat from "./components/chat";
 
-export const Extension = (props: { tree: Tree; resource: Object }) => {
-  console.log(props);
+export const Extension = (props: any) => {
+
+  const { resource, application } = props;
+
+  console.log("Index Application");
+  console.log(application);
 
   return (
     <div style = {{height:"100vh"}}>
-        <Chat/>
+        <Chat resource={resource} application={application}/>
     </div>
   );
 };

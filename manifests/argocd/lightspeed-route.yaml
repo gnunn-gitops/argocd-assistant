@@ -12,7 +12,7 @@ spec:
   port:
     targetPort: https
   tls:
-    termination: passthrough
+    termination: reencrypt
   to:
     kind: Service
     name: lightspeed-app-server

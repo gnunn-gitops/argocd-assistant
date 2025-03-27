@@ -1,14 +1,18 @@
 .chat {
     display: grid;
     grid-template-rows: 1fr min-content;
-    height: 100%;
+    height: 70%;
     width: 100%;
+    position: relative;
 }
 
 .chat-log {
     grid-column: 1;
     grid-row: 1;
     padding: 4px;
+    overflow: scroll;
+    background-color: white;
+    border-color: black;
 }
 
 .chat-entry {
@@ -21,5 +25,9 @@
 
 .chat-entry input {
     flex: 1;
+    margin-right: 6px;
+}
+
+.chat-entry span {
     margin-right: 6px;
 }
