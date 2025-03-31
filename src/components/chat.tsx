@@ -5,6 +5,11 @@ import "./chat.css"
 import {Model, Provider, QueryRequest, QueryResponse} from "../model/service";
 import {submitQuery} from "../service/query";
 
+enum Entity {
+    LIGHTSPEED = "Lightspeed",
+    USER = "You"
+}
+
 type ChatEntry = {
     entity: string;
     message: string;
@@ -14,17 +19,19 @@ const LIGHTSPEED = "Lightspeed";
 
 export const Chat = ({resource, application}:any) => {
 
-    const [chatLog, setChatLog] = React.useState<ChatEntry[]>([{entity: LIGHTSPEED, message: "Welcome to OpenShift Lightspeed, how can I help you?"}]);
+    const [chatLog, setChatLog] = React.useState<ChatEntry[]>([{entity: Entity.LIGHTSPEED, message: "Welcome to OpenShift Lightspeed, how can I help you?"}]);
 
     console.log("Chat Application");
     console.log(application);
 
-    const addEntry = (entry: ChatEntry) => {
+    // I'm passing both to work around some thread safety issues that
+    // I don't want to solve for a simple POC
+    const addEntry = async (query: ChatEntry, response: ChatEntry) => {
         // This might be inefficient but it forces the re-render by causing the
         // React useState to recognize a new variable was set
-        var entries:ChatEntry[] = Array.from(chatLog);
-        entries.push(entry);
-
+        var entries:ChatEntry[] = [...chatLog];
+        entries.push(query);
+        entries.push(response);
         setChatLog(entries);
     }
 
@@ -37,8 +44,6 @@ export const Chat = ({resource, application}:any) => {
           };
 
         const query = target.query.value;
-
-        addEntry({entity: "You", message: query});
 
         const queryRequest: QueryRequest = {
             conversation_id: "9846bb0c-1160-47e9-9505-0d0d55d2c229",
@@ -54,7 +59,7 @@ export const Chat = ({resource, application}:any) => {
         console.log(application);
 
         submitQuery(queryRequest, application).then( (res: QueryResponse) => {
-            addEntry({entity: LIGHTSPEED, message: res.response});
+            addEntry({entity: Entity.USER, message: query},{entity: LIGHTSPEED, message: res.response});
         });
 
         console.log(chatLog);
@@ -64,7 +69,15 @@ export const Chat = ({resource, application}:any) => {
         <div className='chat'>
             <div className='chat-log'>
                 {
-                    chatLog.map(entry => <p><b>{entry.entity}</b>: {entry.message}</p>)
+                    chatLog.map(entry =>
+                      <p>
+                        <b>{entry.entity}</b>:
+                        {String(entry.message).includes('\n') ?
+                           <blockquote><pre>{entry.message}</pre></blockquote>
+                        :
+                          <span>{entry.message}</span>
+                        }
+                      </p>)
                 }
             </div>
             <div className='chat-entry'>

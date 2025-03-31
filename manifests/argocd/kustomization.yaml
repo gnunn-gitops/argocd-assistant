@@ -3,3 +3,4 @@ resources:
 - groups.yaml
 - openshift-gitops.yaml
 - lightspeed-route.yaml
+- application.yaml
