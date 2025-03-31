@@ -42,4 +42,6 @@ is causing issues, needs more investigation.
 
 8. Login into OpenShift GitOps using the `admin` credential provided by RHDP
 
-9.
+9. Go into the `product-catalog` application, click on one of the resources in the tree and select the `Lightspeed` tab and enter a query. Note the UI is currently terrible with hourglass or error reporting, you can use the Developer Tools in the browser to see if there was an issue if no response is returned.
+
+![alt text](https://raw.githubusercontent.com/gnunn-gitops/argocd-lightspeed/main/docs/img/lightspeed.png)
