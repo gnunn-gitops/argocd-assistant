@@ -7,14 +7,14 @@ spec:
   extraConfig:
     extension.config.lightspeed: |
       connectionTimeout: 2s
-      keepAlive: 15s
-      idleConnectionTimeout: 60s
+      keepAlive: 360s
+      idleConnectionTimeout: 360s
       maxIdleConnections: 30
       services:
-      - url: https://lightspeed-app-server-openshift-lightspeed.apps.cluster-7wmpw.7wmpw.sandbox1517.opentlc.com
+      - url: https://lightspeed-app-server-openshift-lightspeed.apps.cluster-plpkg.plpkg.sandbox2414.opentlc.com
         headers:
         - name: Authorization
-          value: '$lightspeed.authorization.token'
+          value: 'Bearer sha256~8y7g5m1h98UfssNcfqIO3k02kQ69pwHtlVBSaWEFjcA'
   server:
     extraCommandArgs:
       - "--enable-proxy-extension"
@@ -31,6 +31,8 @@ spec:
             name: extension-lightspeed
     insecure: true
     route:
+      annotations:
+        haproxy.router.openshift.io/timeout: 360s
       enabled: true
       tls:
         termination: edge
