@@ -27,8 +27,17 @@ export const Extension = (props: any) => {
         },
         chatWindowStyle: {
             width: "100%",
-            height: "100%"
+            height: "80vh"
+        },
+        botBubbleStyle: {
+            backgroundColor: "#6D7F8B",
+            color: "#F8F8FB"
+        },
+        userBubbleStyle: {
+            background: "#00A2B3",
+            color: "#ffffff"
         }
+
     }
 
     const flow = {
