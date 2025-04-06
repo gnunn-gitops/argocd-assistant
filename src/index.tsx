@@ -128,5 +128,5 @@ export const Extension = (props: any) => {
 export const component = Extension;
 
 ((window: any) => {
-    window?.extensionsAPI?.registerResourceExtension(component, '**', '*', 'Lightspeed', { icon: 'fa-sharp fa-light fa-circle-question fa-lg' });
+    window?.extensionsAPI?.registerResourceExtension(component, '**', '*', 'Lightspeed', { icon: 'fa-sharp fa-light fa-message fa-lg' });
 })(window);
