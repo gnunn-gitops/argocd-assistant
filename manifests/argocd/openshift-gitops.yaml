@@ -11,10 +11,10 @@ spec:
       idleConnectionTimeout: 360s
       maxIdleConnections: 30
       services:
-      - url: https://lightspeed-app-server-openshift-lightspeed.apps.cluster-plpkg.plpkg.sandbox2414.opentlc.com
+      - url: https://lightspeed-app-server-openshift-lightspeed.apps.cluster-5bcbc.5bcbc.sandbox1120.opentlc.com
         headers:
         - name: Authorization
-          value: 'Bearer sha256~8y7g5m1h98UfssNcfqIO3k02kQ69pwHtlVBSaWEFjcA'
+          value: 'Bearer sha256~FrL90twK9yCx3S3J5LQNQwmeL0MypymoUwbLnCANf_4'
   server:
     extraCommandArgs:
       - "--enable-proxy-extension"
