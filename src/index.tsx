@@ -70,7 +70,7 @@ export const Extension = (props: any) => {
                     console.log("No manifest available");
                 }
 
-                if (events.items.length > 0) {
+                if (events?.items?.length > 0) {
                     attachments.push(
                         {
                             content: JSON.stringify(events),

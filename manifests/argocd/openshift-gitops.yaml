@@ -14,7 +14,7 @@ spec:
       - url: https://lightspeed-app-server-openshift-lightspeed.apps.cluster-5bcbc.5bcbc.sandbox1120.opentlc.com
         headers:
         - name: Authorization
-          value: 'Bearer sha256~FrL90twK9yCx3S3J5LQNQwmeL0MypymoUwbLnCANf_4'
+          value: '$lightspeed.auth.header'
   server:
     extraCommandArgs:
       - "--enable-proxy-extension"

@@ -1,4 +1,5 @@
 resources:
+- serviceaccount-token.yaml
 - clusterrolebinding.yaml
 - groups.yaml
 - openshift-gitops.yaml
