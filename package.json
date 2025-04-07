@@ -30,6 +30,7 @@
     },
     "dependencies": {
         "react-chatbotify": "^1.6.3",
+        "showdown": "^2.1.0",
         "typescript": "^4.9.3",
         "uuid": "^11.1.0",
         "webpack": "^5.75.0",

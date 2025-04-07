@@ -1,9 +1,9 @@
 import * as React from "react";
 import ChatBot, { Options } from "react-chatbotify";
 import {v4 as uuidv4} from 'uuid';
-//import * as YAML from 'yaml';
+import * as Showdown from 'showdown';
 
-import {Attachment, AttachmentTypes, Events, Model, Provider, QueryRequest, QueryResponse} from "./model/service";
+import {Attachment, AttachmentTypes, Events, Model, Provider, QueryRequest, QueryResponse, SYSTEM_PROMPT} from "./model/service";
 import {submitQuery} from "./service/query";
 
 import "./index.css"
@@ -16,9 +16,9 @@ export const Extension = (props: any) => {
 
     const conversationID = uuidv4();
 
-    const { resource, application } = props;
+    const convertor = new Showdown.Converter();
 
-    console.log(resource);
+    const { resource, application } = props;
 
     const application_name = application?.metadata?.name || "";
 
@@ -31,6 +31,9 @@ export const Extension = (props: any) => {
         },
         chatHistory: {
             storageKey: "lightspeed"
+        },
+        botBubble: {
+            dangerouslySetInnerHtml: true
         },
         chatWindow: {
             showScrollbar: true
@@ -89,19 +92,19 @@ export const Extension = (props: any) => {
                     model: Model.GPT4,
                     provider: Provider.AZURE,
                     query: params.userInput,
-                    system_prompt: "",
+                    system_prompt: SYSTEM_PROMPT,
                     attachments: attachments
                 }
 
                 const result: QueryResponse = await submitQuery(queryRequest, application);
-
-				return result.response;
+                return convertor.makeHtml(result.response);
 			},
 			path: "loop",
 		}
     }
 
-    // Get Events
+    // Get Events, this code from Argo CD metrics extension
+    // https://github.com/argoproj-labs/argocd-extension-metrics
     React.useEffect(() => {
         let url = `/api/v1/applications/${application_name}/events?resourceUID=${resource.metadata.uid}&resourceNamespace=${resource.metadata.namespace}&resourceName=${resource.metadata.name}`;
         if (resource.kind === "Application") {

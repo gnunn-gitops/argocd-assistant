@@ -54,3 +54,5 @@ This POC has a few limitations some of which were mentioned in the intro:
 2. Uses the query API rather then the streaming query API which would provide a better experience
 
 3. Attaches events and manifest but not pod logs at this time, not sure how to best handle extremely large pod logs?
+
+4. The Lightspeed streaming API doesn't work with the Argo CD Proxy Extension, it always returns a single response rather then chunk by chunk as far as I can tell
