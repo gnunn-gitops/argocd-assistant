@@ -4,7 +4,7 @@ import {v4 as uuidv4} from 'uuid';
 import * as Showdown from 'showdown';
 
 import {Attachment, AttachmentTypes, Events, Model, Provider, QueryRequest, QueryResponse, SYSTEM_PROMPT} from "./model/service";
-import {submitQuery} from "./service/query";
+import {query} from "./service/query";
 
 import "./index.css"
 
@@ -95,9 +95,14 @@ export const Extension = (props: any) => {
                     system_prompt: SYSTEM_PROMPT,
                     attachments: attachments
                 }
-
-                const result: QueryResponse = await submitQuery(queryRequest, application);
-                return convertor.makeHtml(result.response);
+                try {
+                    const result: QueryResponse = await query(queryRequest, application);
+                    if (result.status == 200) return convertor.makeHtml(result.response);
+                    else return convertor.makeHtml("<p><b>Unexpected Error</b>: " + result.response + "</p>");
+                } catch (error) {
+                    console.log(error);
+                    return convertor.makeHtml("<p><b>Unexpected Error</b>: " + error.message + "</p>");
+                }
 			},
 			path: "loop",
 		}

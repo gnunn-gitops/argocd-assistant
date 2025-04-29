@@ -7,10 +7,6 @@ function getExtensionQueryURL(): string {
     return PROTOCOL + "://" + location.host + "/extensions/lightspeed/v1/query"
 }
 
-// function getLightSpeedHost(): string {
-//     return "lightspeed-app-server-openshift-lightspeed" + location.host.substring(location.host.indexOf(".apps"))
-// }
-
 function getHeaders(application: any): Headers {
 
     console.log(application);
@@ -29,8 +25,7 @@ function getHeaders(application: any): Headers {
     return headers;
 }
 
-export function submitQuery(query: QueryRequest, application: any): Promise<QueryResponse> {
-    //const url: string = PROTOCOL + "://" + getLightSpeedHost() + "/v1/query"
+export const query = async (query: QueryRequest, application: any): Promise<QueryResponse> => {
     const url: string = getExtensionQueryURL();
 
     const request: RequestInfo = new Request(url, {
@@ -40,14 +35,25 @@ export function submitQuery(query: QueryRequest, application: any): Promise<Quer
         body: JSON.stringify(query)
     })
 
-    return fetch(request)
-        // the JSON body is taken from the response
-        .then(res => res.json())
-        .then(res => {
-            // The response has an `any` type, so we need to cast
-            // it to the `User` type, and return it from the promise
-            return res as QueryResponse
-        }) as Promise<QueryResponse>;
+    const response = await fetch(request);
+    const body = await response.json();
+    console.log("Body");
+    console.log(body);
+    var result: QueryResponse;
+    if (response.status == 200) {
+        result = {
+            status: response.status,
+            conversationId: body.conversationId,
+            response: body.response
+        }
+    } else {
+        result = {
+            status: response.status,
+            conversationId: body.conversationId,
+            response: body.detail
+        }
+    }
+    return result;
 }
 
 // type QueryResponseStart = {
