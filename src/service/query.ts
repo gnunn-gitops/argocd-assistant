@@ -1,6 +1,8 @@
 import { QueryRequest, QueryResponse} from "../model/service";
 
-const PROTOCOL = "https";
+const PROTOCOL:string = "https";
+const CONTENT_TYPE:string = "Content-Type";
+const APPLICATION_JSON:string = "application/json"
 
 function getExtensionQueryURL(): string {
     console.log(location.host)
@@ -16,8 +18,8 @@ function getHeaders(application: any): Headers {
     const project = application?.spec?.project || "";
 
     const headers: Headers = new Headers({
-        'Content-Type': "application/json",
-        'Accept': 'application/json',
+        'Content-Type': APPLICATION_JSON,
+        'Accept': APPLICATION_JSON,
         'Origin': 'https://' + location.host,
         "Argocd-Application-Name": `${applicationNamespace}:${applicationName}`,
         "Argocd-Project-Name": `${project}`,
@@ -37,7 +39,7 @@ export const query = async (query: QueryRequest, application: any): Promise<Quer
 
     const response = await fetch(request);
     var result: QueryResponse;
-    if (response.bodyUsed) {
+    if (response.headers.has(CONTENT_TYPE) && response.headers.get(CONTENT_TYPE) == APPLICATION_JSON) {
         const body = await response.json();
         console.log("Body");
         console.log(body);
@@ -55,11 +57,11 @@ export const query = async (query: QueryRequest, application: any): Promise<Quer
             }
         }
     } else {
-        console.log("No body was returned");
+        const message: string = await response.text();
         result = {
             status: response.status,
             conversationId: query.conversation_id,
-            response: "No message provided"
+            response: message
         }
     }
     return result;

@@ -89,8 +89,8 @@ export const Extension = (props: any) => {
                 console.log(attachments);
                 const queryRequest: QueryRequest = {
                     conversation_id: conversationID,
-                    //model: Model.GPT4,
-                    //provider: Provider.AZURE,
+                    // model: Model.GPT4,
+                    // provider: Provider.OPENSHIFT_AI,
                     query: params.userInput,
                     system_prompt: SYSTEM_PROMPT,
                     attachments: attachments
