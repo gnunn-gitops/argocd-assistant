@@ -1,5 +1,6 @@
 export enum Provider {
-    AZURE = "Azure"
+    AZURE = "Azure",
+    OPENSHIFT_AI = "red_hat_openshift_ai"
 }
 
 export enum Model {
@@ -26,8 +27,8 @@ export type Attachment = {
 export type QueryRequest = {
     attachments?: Attachment[],
     conversation_id: string,
-    model: Model,
-    provider: Provider,
+    model?: Model,
+    provider?: Provider,
     query: string,
     system_prompt: string
 }

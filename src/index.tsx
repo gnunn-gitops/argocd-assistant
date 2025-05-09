@@ -3,7 +3,7 @@ import ChatBot, { Options } from "react-chatbotify";
 import {v4 as uuidv4} from 'uuid';
 import * as Showdown from 'showdown';
 
-import {Attachment, AttachmentTypes, Events, Model, Provider, QueryRequest, QueryResponse, SYSTEM_PROMPT} from "./model/service";
+import {Attachment, AttachmentTypes, Events, QueryRequest, QueryResponse, SYSTEM_PROMPT} from "./model/service";
 import {query} from "./service/query";
 
 import "./index.css"
@@ -89,8 +89,8 @@ export const Extension = (props: any) => {
                 console.log(attachments);
                 const queryRequest: QueryRequest = {
                     conversation_id: conversationID,
-                    model: Model.GPT4,
-                    provider: Provider.AZURE,
+                    //model: Model.GPT4,
+                    //provider: Provider.AZURE,
                     query: params.userInput,
                     system_prompt: SYSTEM_PROMPT,
                     attachments: attachments
@@ -98,7 +98,7 @@ export const Extension = (props: any) => {
                 try {
                     const result: QueryResponse = await query(queryRequest, application);
                     if (result.status == 200) return convertor.makeHtml(result.response);
-                    else return convertor.makeHtml("<p><b>Unexpected Error</b>: " + result.response + "</p>");
+                    else return convertor.makeHtml("<p><b>Unexpected Error (" + result.status + ")</b>: " + result.response + "</p>");
                 } catch (error) {
                     console.log(error);
                     return convertor.makeHtml("<p><b>Unexpected Error</b>: " + error.message + "</p>");

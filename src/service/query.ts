@@ -36,21 +36,30 @@ export const query = async (query: QueryRequest, application: any): Promise<Quer
     })
 
     const response = await fetch(request);
-    const body = await response.json();
-    console.log("Body");
-    console.log(body);
     var result: QueryResponse;
-    if (response.status == 200) {
-        result = {
-            status: response.status,
-            conversationId: body.conversationId,
-            response: body.response
+    if (response.bodyUsed) {
+        const body = await response.json();
+        console.log("Body");
+        console.log(body);
+        if (response.status == 200) {
+            result = {
+                status: response.status,
+                conversationId: body.conversationId,
+                response: body.response
+            }
+        } else {
+            result = {
+                status: response.status,
+                conversationId: body.conversationId,
+                response: body.detail
+            }
         }
     } else {
+        console.log("No body was returned");
         result = {
             status: response.status,
-            conversationId: body.conversationId,
-            response: body.detail
+            conversationId: query.conversation_id,
+            response: "No message provided"
         }
     }
     return result;
