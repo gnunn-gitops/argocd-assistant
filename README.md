@@ -180,3 +180,5 @@ This POC has a few limitations some of which were mentioned in the intro:
 4. The Lightspeed streaming API doesn't work with the Argo CD Proxy Extension, it always returns a single response rather then chunk by chunk as far as I can tell
 
 5. Formatting of responses needs improvement, need to spend time looking at how console extension is dealing with this
+
+6. No luck getting the proxy extension to access a secret other then the default `argocd-secret` for the openshift token needed for the authorization header which makes setup a bit more complex.
