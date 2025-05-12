@@ -23,7 +23,129 @@ Another minor issue is the Proxy Extension will not connect to the Lightspeed in
 an unknown authority. Using a reencrypt route and hitting the route works fine but this means requiring a per-cluster configuration
 for the extension versus just using the service URL for the Argo CD Proxy Extension.
 
-### Installing POC
+### Installing POC on Existing Cluster
+
+Note you muse have OpenShift Lightspeed installed and working on the cluster.
+
+1. In the `openshift-lightspeed` namespace create a new networkpolicy to allow the Argo CD extension to talk to the Lightspeed service.
+Note add any additional Argo CD instances you want to use the extension for to the NetworkPolicy.
+
+```
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  labels:
+    app.kubernetes.io/component: application-server
+    app.kubernetes.io/name: lightspeed-service-api
+    app.kubernetes.io/part-of: openshift-lightspeed
+  name: lightspeed-app-server-gitops
+  namespace: openshift-lightspeed
+spec:
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: openshift-gitops
+      podSelector:
+        matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+          - openshift-gitops-server
+    ports:
+    - port: 8443
+      protocol: TCP
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: application-server
+      app.kubernetes.io/managed-by: lightspeed-operator
+      app.kubernetes.io/name: lightspeed-service-api
+      app.kubernetes.io/part-of: openshift-lightspeed
+  policyTypes:
+  - Ingress
+```
+
+2. Lightspeed requires an OpenShift token, in the console it uses the user's token but Argo CD UI does not have this token. As a result
+we will use the `application-controller` service account to create a token. To do so create the following secret:
+
+```
+apiVersion: v1
+kind: Secret
+metadata:
+  name: lightspeed-auth-secret
+  annotations:
+    kubernetes.io/service-account.name: openshift-gitops-argocd-application-controller
+type: kubernetes.io/service-account-token
+```
+
+3. You will need to copy the token into the argocd-secret with the key `argocd-secret`. If you want to do this
+in a GitOps way you an use ExternalSecrets to take the secret from step 2 and insert it into the existing `argocd-secret`
+
+4. Add a ClusterRoleBinding to allow the `application-controller` service account to call the Lightspeed API, again adjust as needed
+for your Argo CD instance(s).
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: gitops-cluster-admin
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: openshift-gitops-argocd-application-controller
+  namespace: openshift-gitops
+```
+
+5. Install the extension into the Argo CD instance by adding the following:
+
+```
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: openshift-gitops
+  namespace: openshift-gitops
+spec:
+  extraConfig:
+    extension.config.lightspeed: |
+      connectionTimeout: 2s
+      keepAlive: 360s
+      idleConnectionTimeout: 360s
+      maxIdleConnections: 30
+      services:
+      - url: https://lightspeed-app-server.openshift-lightspeed.svc.cluster.local:8443
+        headers:
+        - name: Authorization
+          value: '$lightspeed.auth.header'
+  server:
+    extraCommandArgs:
+      - "--enable-proxy-extension"
+    initContainers:
+      - env:
+          - name: EXTENSION_URL
+            value: "https://github.com/gnunn-gitops/argocd-lightspeed/releases/download/0.2.0/extension-lightspeed-0.2.0.tar"
+        image: "quay.io/argoprojlabs/argocd-extension-installer:v0.0.8"
+        name: extension-lightspeed
+        securityContext:
+          allowPrivilegeEscalation: false
+        volumeMounts:
+          - name: extensions
+            mountPath: /tmp/extensions/
+    volumeMounts:
+      - mountPath: /etc/pki/tls/certs/service-ca.crt
+        name: config-service-cabundle
+        subPath: service-ca.crt
+    volumes:
+      - configMap:
+          name: config-service-cabundle
+          defaultMode: 420
+        name: config-service-cabundle
+        optional: true
+```
+
+### Installing POC on RHDP Lightspeed Cluster
 
 To install the POC follow these steps:
 
