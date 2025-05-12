@@ -178,3 +178,5 @@ This POC has a few limitations some of which were mentioned in the intro:
 3. Attaches events and manifest but not pod logs at this time, not sure how to best handle extremely large pod logs?
 
 4. The Lightspeed streaming API doesn't work with the Argo CD Proxy Extension, it always returns a single response rather then chunk by chunk as far as I can tell
+
+5. Formatting of responses needs improvement, need to spend time looking at how console extension is dealing with this
