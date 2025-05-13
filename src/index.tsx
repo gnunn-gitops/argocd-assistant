@@ -139,16 +139,18 @@ export const Extension = (props: any) => {
                 if (isAttachRequest(params.userInput) && isPod(resource)) {
                     console.log("This is a pod " + resource_kind);
                     return "attach"
-                } else if (isAttachRequest(params.userInput)) return "no_attach"
+                } else if (isAttachRequest(params.userInput)) {
+                    return "no_attach"
+                }
                 else return "loop"
             }
 		},
         no_attach: {
-            message: "Logs can only be attached for Pod resources.",
+            message: "Sorry, logs can only be attached for Pod resources.",
             path: "loop"
         },
         attach: {
-            message: "Select the container for which to attach the logs:",
+            message: "Select the single container for which to attach the logs:",
 			checkboxes: {items: containers, min: 1, max: 1},
             chatDisabled: true,
             function: (params) => setForm({...form, container: params.userInput}),
@@ -177,12 +179,13 @@ export const Extension = (props: any) => {
         },
         get_logs: {
             message: async(params) => {
-                getLogs(application, resource, form["container"], form["lines"]).then( (result:LogEntry[]) => {
-                    console.log(result)
+                try {
+                    const result:LogEntry[] = await getLogs(application, resource, form["container"], form["lines"]);
                     setLogs(result);
-                }).catch( (error) => {
-                    return "Unexpected error: " + error.message;
-                });
+                    return "Requested logs have been attached";
+                } catch (error) {
+                    return "<p>Unexpected error: " + error.message + "</p>";
+                }
             },
             path: "loop"
         }
