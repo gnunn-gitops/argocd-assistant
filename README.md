@@ -120,6 +120,9 @@ spec:
         - name: Authorization
           value: '$lightspeed.auth.header'
   server:
+    annotations:
+      # Needed to support longer queries to lightspeed
+      haproxy.router.openshift.io/timeout: 360s
     extraCommandArgs:
       - "--enable-proxy-extension"
     initContainers:
@@ -144,6 +147,8 @@ spec:
         name: config-service-cabundle
         optional: true
 ```
+
+
 
 ### Installing POC on RHDP Lightspeed Cluster
 
