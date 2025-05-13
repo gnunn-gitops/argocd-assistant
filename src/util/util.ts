@@ -4,7 +4,7 @@ const POD_KIND = "Pod";
 // export const APPLICATION_JSON:string = "application/json"
 
 export const HttpHeader = {
-  CONTENT_TYPE: 'Content-Type',
+    CONTENT_TYPE: 'Content-Type',
 };
 
 export const Protocol = {
@@ -13,12 +13,12 @@ export const Protocol = {
 }
 
 export const ContentType = {
-  APPLICATION_JSON: 'application/json',
-  APPLICATION_XML: 'application/xml',
-  TEXT_PLAIN: 'text/plain',
-  TEXT_HTML: 'text/html',
-  APPLICATION_FORM_URLENCODED: 'application/x-www-form-urlencoded',
-  MULTIPART_FORM_DATA: 'multipart/form-data',
+    APPLICATION_JSON: 'application/json',
+    APPLICATION_XML: 'application/xml',
+    TEXT_PLAIN: 'text/plain',
+    TEXT_HTML: 'text/html',
+    APPLICATION_FORM_URLENCODED: 'application/x-www-form-urlencoded',
+    MULTIPART_FORM_DATA: 'multipart/form-data',
 } as const;
 
 //export type ContentType = (typeof ContentType)[keyof typeof ContentType];
@@ -27,7 +27,7 @@ export function getContainers(pod: any): string[] {
     console.log(pod);
     var result: string[] = [];
     try {
-        pod.spec.containers.forEach( (container) => {
+        pod.spec.containers.forEach((container) => {
             result.push(container.name);
         })
     } catch (error) {
@@ -46,8 +46,8 @@ export function isAttachRequest(input: string): boolean {
 
 export function isCancelRequest(input: string): boolean {
     return input.toUpperCase().localeCompare('CANCEL', undefined, { sensitivity: 'base' }) == 0 ||
-           input.toUpperCase().localeCompare('QUIT', undefined, { sensitivity: 'base' }) == 0 ||
-           input.toUpperCase().localeCompare('EXIT', undefined, { sensitivity: 'base' }) == 0;
+        input.toUpperCase().localeCompare('QUIT', undefined, { sensitivity: 'base' }) == 0 ||
+        input.toUpperCase().localeCompare('EXIT', undefined, { sensitivity: 'base' }) == 0;
 }
 
 
@@ -67,4 +67,13 @@ export function getHeaders(application: any): Headers {
         "Argocd-Project-Name": `${project}`,
     });
     return headers;
+}
+
+export function convertToHTML(response: string, convertor: any): string {
+    return convertor.makeHtml(
+        response.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;"));
 }

@@ -5,7 +5,7 @@ import * as Showdown from 'showdown';
 
 import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, QueryResponse, SYSTEM_PROMPT} from "./model/service";
 import {query} from "./service/query";
-import {getContainers, isAttachRequest, isCancelRequest, isPod} from "./util/util";
+import {convertToHTML, getContainers, isAttachRequest, isCancelRequest, isPod} from "./util/util";
 import {getLogs} from "./service/logs";
 import "./index.css"
 
@@ -127,7 +127,7 @@ export const Extension = (props: any) => {
                 }
                 try {
                     const result: QueryResponse = await query(queryRequest, application);
-                    if (result.status == 200) return convertor.makeHtml(result.response);
+                    if (result.status == 200) return convertToHTML(result.response, convertor);
                     else return convertor.makeHtml("<p><b>Unexpected Error (" + result.status + ")</b>: " + result.response + "</p>");
                 } catch (error) {
                     console.log(error);
