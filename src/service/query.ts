@@ -1,34 +1,9 @@
+import { ContentType, HttpHeader, getHeaders } from "../util/util";
 import { QueryRequest, QueryResponse} from "../model/service";
 
-const PROTOCOL:string = "https";
-const CONTENT_TYPE:string = "Content-Type";
-const APPLICATION_JSON:string = "application/json"
-
-function getExtensionQueryURL(): string {
-    console.log(location.host)
-    return PROTOCOL + "://" + location.host + "/extensions/lightspeed/v1/query"
-}
-
-function getHeaders(application: any): Headers {
-
-    console.log(application);
-
-    const applicationName = application?.metadata?.name || "";
-    const applicationNamespace = application?.metadata?.namespace || "";
-    const project = application?.spec?.project || "";
-
-    const headers: Headers = new Headers({
-        'Content-Type': APPLICATION_JSON,
-        'Accept': APPLICATION_JSON,
-        'Origin': 'https://' + location.host,
-        "Argocd-Application-Name": `${applicationNamespace}:${applicationName}`,
-        "Argocd-Project-Name": `${project}`,
-    });
-    return headers;
-}
 
 export const query = async (query: QueryRequest, application: any): Promise<QueryResponse> => {
-    const url: string = getExtensionQueryURL();
+    const url: string = "/extensions/lightspeed/v1/query"
 
     const request: RequestInfo = new Request(url, {
         credentials: 'include',
@@ -39,7 +14,7 @@ export const query = async (query: QueryRequest, application: any): Promise<Quer
 
     const response = await fetch(request);
     var result: QueryResponse;
-    if (response.headers.has(CONTENT_TYPE) && response.headers.get(CONTENT_TYPE) == APPLICATION_JSON) {
+    if (response.headers.has(HttpHeader.CONTENT_TYPE) && response.headers.get(HttpHeader.CONTENT_TYPE) == ContentType.APPLICATION_JSON) {
         const body = await response.json();
         console.log("Body");
         console.log(body);
