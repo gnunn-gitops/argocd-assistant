@@ -148,8 +148,6 @@ spec:
         optional: true
 ```
 
-
-
 ### Installing POC on RHDP Lightspeed Cluster
 
 To install the POC follow these steps:
