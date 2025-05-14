@@ -1,12 +1,15 @@
 import { LogEntry } from "src/model/service";
 import { getHeaders } from "../util/util";
 
+export const MAX_LINES = 250;
+
 export const getLogs = async(application: any, pod: any, container: string, count: number):Promise<LogEntry[]> => {
     const params = new URLSearchParams({
         appNamespace: application.metadata.namespace,
         namespace: pod.metadata.namespace,
         podName: pod.metadata.name,
         container: container,
+        tailLines: String(count),
         follow: "false",
         sinceSeconds: "0"
     }).toString();
@@ -31,6 +34,9 @@ export const getLogs = async(application: any, pod: any, container: string, coun
 
     var results:LogEntry[] = [];
 
+    // Since we use the `tailLines` parameter we don't actually need to count the lines
+    // and could just read until done. However just leaving it in for now for
+    // flexibility.
     while (index <= count) {
         const { done, value } = await reader.read();
         if (done) {
@@ -55,40 +61,4 @@ export const getLogs = async(application: any, pod: any, container: string, coun
     }
 
     return results;
-
-    // const reader = response.body.getReader();
-    // const decoder = new TextDecoder();
-    // let lines: string[] = [];
-    // let currentLine = "";
-    // let linesRead = 0;
-
-    // while (linesRead <= count) {
-    //     const { done, value } = await reader.read();
-    //     if (done) {
-    //     if (currentLine) {
-    //         lines.push(currentLine);
-    //         linesRead++;
-    //     }
-    //     break;
-    //     }
-
-    //     const chunk = decoder.decode(value);
-    //     for (const char of chunk) {
-    //     if (char === '\n') {
-    //         lines.push(currentLine);
-    //         currentLine = "";
-    //         linesRead++;
-    //         if (linesRead >= 100) break;
-    //     } else {
-    //         currentLine += char;
-    //     }
-    //     }
-    //     if (linesRead > count) break;
-    // }
-
-    // console.log("Logs");
-    // console.log(lines);
-
-    // return lines.slice(0,count);
-
 }

@@ -6,7 +6,7 @@ import * as Showdown from 'showdown';
 import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, QueryResponse, SYSTEM_PROMPT} from "./model/service";
 import {query} from "./service/query";
 import {convertToHTML, getContainers, isAttachRequest, isCancelRequest, isPod} from "./util/util";
-import {getLogs} from "./service/logs";
+import {getLogs, MAX_LINES} from "./service/logs";
 import "./index.css"
 
 export const Extension = (props: any) => {
@@ -157,7 +157,7 @@ export const Extension = (props: any) => {
             path: "ask_lines"
         },
         ask_lines: {
-			message: "How many lines of the log did you want to attach (max 100)?",
+			message: "How many lines of the log did you want to attach (max " + MAX_LINES + ")?",
 			function: (params) => {
                 setForm({...form, lines: params.userInput});
                 console.log("Form");
@@ -169,8 +169,8 @@ export const Extension = (props: any) => {
 					await params.injectMessage("The number of lines needs to be a number!");
 					return;
 				}
-                if (Number(params.userInput) == 0 || Number(params.userInput) > 100 ) {
-					await params.injectMessage("The number of lines needs to be more then 0 and 100 or less");
+                if (Number(params.userInput) == 0 || Number(params.userInput) > MAX_LINES ) {
+					await params.injectMessage("The number of lines needs to be more then 0 and " + MAX_LINES + " or less");
 					return;
                 }
                 if (isCancelRequest(params.userInput)) return "start";
