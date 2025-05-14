@@ -5,8 +5,8 @@ import * as Showdown from 'showdown';
 
 import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, QueryResponse, SYSTEM_PROMPT} from "./model/service";
 import {query} from "./service/query";
-import {convertToHTML, getContainers, isAttachRequest, isCancelRequest, isPod} from "./util/util";
-import {getLogs, MAX_LINES} from "./service/logs";
+import {convertToHTML, getContainers, isAttachRequest, isCancelRequest} from "./util/util";
+import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
 import "./index.css"
 
 export const Extension = (props: any) => {
@@ -25,7 +25,7 @@ export const Extension = (props: any) => {
 
     const { resource, application } = props;
 
-    const containers:string[] = isPod(resource) ? getContainers(resource) : [];
+    const containers:string[] = hasLogs(resource) ? getContainers(resource) : [];
     console.log(containers);
 
     const application_name = application?.metadata?.name || "";
@@ -70,10 +70,10 @@ export const Extension = (props: any) => {
 
     const flow = {
         start: {
-            message: "How can I help you with the resource '" + resource_name + "' of type " + resource_kind + "?" + ( isPod(resource) ? " I notice this is a Pod, to attach one or more container logs type 'Attach' at any time.": ""),
+            message: "How can I help you with the resource '" + resource_name + "' of type " + resource_kind + "?" + ( hasLogs(resource) ? " I notice this resource has logs available, to attach one or more container logs type 'Attach' at any time.": ""),
 			path: async (params) => {
                 console.log("User input " + params.userInput);
-                if (isAttachRequest(params.userInput) && isPod(resource)) {
+                if (isAttachRequest(params.userInput) && hasLogs(resource)) {
                     console.log("This is a pod " + resource_kind);
                     return "attach"
                 } else if (isAttachRequest(params.userInput)) return "no_attach"
@@ -105,6 +105,8 @@ export const Extension = (props: any) => {
                     )
                 }
 
+                console.log("Checking logs");
+                console.log(logs);
                 if (logs?.length > 0 ) {
                     attachments.push(
                         {
@@ -136,7 +138,7 @@ export const Extension = (props: any) => {
 			},
 			path: async (params) => {
                 console.log("User input " + params.userInput);
-                if (isAttachRequest(params.userInput) && isPod(resource)) {
+                if (isAttachRequest(params.userInput) && hasLogs(resource)) {
                     console.log("This is a pod " + resource_kind);
                     return "attach"
                 } else if (isAttachRequest(params.userInput)) {
@@ -181,6 +183,8 @@ export const Extension = (props: any) => {
             message: async(params) => {
                 try {
                     const result:LogEntry[] = await getLogs(application, resource, form["container"], form["lines"]);
+                    console.log("Updating logs");
+                    console.log(result);
                     setLogs(result);
                     return "Requested logs have been attached";
                 } catch (error) {

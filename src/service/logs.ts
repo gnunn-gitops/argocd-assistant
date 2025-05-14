@@ -1,7 +1,12 @@
 import { LogEntry } from "src/model/service";
-import { getHeaders } from "../util/util";
+import { getHeaders, Kinds } from "../util/util";
 
 export const MAX_LINES = 250;
+
+// Test if resource is a pod or something that has a PodSpec.
+export function hasLogs(resource: any): boolean {
+    return resource?.spec?.template?.spec?.containers || resource?.kind === Kinds.POD;
+}
 
 export const getLogs = async(application: any, pod: any, container: string, count: number):Promise<LogEntry[]> => {
     const params = new URLSearchParams({

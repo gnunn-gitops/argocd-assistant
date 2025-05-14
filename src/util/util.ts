@@ -1,8 +1,3 @@
-const POD_KIND = "Pod";
-
-// export const CONTENT_TYPE:string = "Content-Type";
-// export const APPLICATION_JSON:string = "application/json"
-
 export const HttpHeader = {
     CONTENT_TYPE: 'Content-Type',
 };
@@ -10,6 +5,15 @@ export const HttpHeader = {
 export const Protocol = {
     HTTP: 'http',
     HTTPS: 'https'
+}
+
+export const Kinds = {
+    POD: 'Pod',
+    REPLICA_SET: 'ReplicaSet',
+    DEPLOYMENT: 'Deployment',
+    STATEFUL_SET: 'StatefulSet',
+    JOB: 'Job',
+    ROLLOUT: 'Rollout'
 }
 
 export const ContentType = {
@@ -21,23 +25,27 @@ export const ContentType = {
     MULTIPART_FORM_DATA: 'multipart/form-data',
 } as const;
 
-//export type ContentType = (typeof ContentType)[keyof typeof ContentType];
-
-export function getContainers(pod: any): string[] {
-    console.log(pod);
+// Handle anything that is a pod or has a PodSpec template.
+export function getContainers(resource: any): string[] {
     var result: string[] = [];
-    try {
-        pod.spec.containers.forEach((container) => {
-            result.push(container.name);
-        })
-    } catch (error) {
-        console.log("This is not a pod")
+    if (resource?.kind === Kinds.POD) {
+        try {
+            resource.spec.containers.forEach((container) => {
+                result.push(container.name);
+            })
+        } catch (error) {
+            console.log("This is not a pod")
+        }
+    } else if (resource?.spec?.template?.spec?.containers) {
+        try {
+            resource.spec.template.spec.containers.forEach((container) => {
+                result.push(container.name);
+            })
+        } catch (error) {
+            console.log("Invalid pod specification")
+        }
     }
     return result;
-}
-
-export function isPod(resource: any): boolean {
-    return (resource?.kind === POD_KIND);
 }
 
 export function isAttachRequest(input: string): boolean {
