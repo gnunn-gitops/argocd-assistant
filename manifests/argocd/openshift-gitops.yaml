@@ -11,7 +11,7 @@ spec:
       idleConnectionTimeout: 360s
       maxIdleConnections: 30
       services:
-      - url: https://lightspeed-app-server-openshift-lightspeed.apps.cluster-5bcbc.5bcbc.sandbox1120.opentlc.com
+      - url: https://lightspeed-app-server.openshift-lightspeed.svc.cluster.local:8443
         headers:
         - name: Authorization
           value: '$lightspeed.auth.header'
@@ -21,7 +21,7 @@ spec:
     initContainers:
       - env:
           - name: EXTENSION_URL
-            value: "https://gexperts.com/files/extension-lightspeed-0.1.0.tar"
+            value: "https://github.com/gnunn-gitops/argocd-lightspeed/releases/download/0.3.0/extension-lightspeed-0.3.0.tar"
         image: "quay.io/argoprojlabs/argocd-extension-installer:v0.0.8"
         name: extension-lightspeed
         securityContext:
