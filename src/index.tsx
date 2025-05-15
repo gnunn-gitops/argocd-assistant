@@ -162,8 +162,6 @@ export const Extension = (props: any) => {
 			message: "How many lines of the log did you want to attach (max " + MAX_LINES + ")?",
 			function: (params) => {
                 setForm({...form, lines: params.userInput});
-                console.log("Form");
-                console.log(form);
             },
 			path: async (params) => {
                 if (params.userInput)
@@ -183,8 +181,6 @@ export const Extension = (props: any) => {
             message: async(params) => {
                 try {
                     const result:LogEntry[] = await getLogs(application, resource, form["container"], form["lines"]);
-                    console.log("Updating logs");
-                    console.log(result);
                     setLogs(result);
                     return "Requested logs have been attached";
                 } catch (error) {
