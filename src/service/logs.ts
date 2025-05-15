@@ -8,18 +8,35 @@ export function hasLogs(resource: any): boolean {
     return resource?.spec?.template?.spec?.containers || resource?.kind === Kinds.POD;
 }
 
-export const getLogs = async(application: any, pod: any, container: string, count: number):Promise<LogEntry[]> => {
+// Pull out group from API version
+function getGroup(apiVersion:string):string {
+    const index = apiVersion.indexOf("/");
+    if (index > 0) return apiVersion.substring(0, index);
+    else return apiVersion;
+}
+
+export const getLogs = async (application: any, resource: any, container: string, count: number): Promise<LogEntry[]> => {
+
+    console.log(resource);
+
     const params = new URLSearchParams({
         appNamespace: application.metadata.namespace,
-        namespace: pod.metadata.namespace,
-        podName: pod.metadata.name,
+        namespace: resource.metadata.namespace,
         container: container,
         tailLines: String(count),
         follow: "false",
         sinceSeconds: "0"
-    }).toString();
+    });
 
-    const url = "/api/v1/applications/" + application.metadata.name + "/logs?" + params;
+    if (resource.kind == Kinds.POD) {
+        params.append("podName", resource.metadata.name);
+    } else {
+        params.append("resourceName", resource.metadata.name);
+        params.append("kind", resource.kind);
+        params.append("group", getGroup(resource.apiVersion));
+    }
+
+    const url = "/api/v1/applications/" + application.metadata.name + "/logs?" + params.toString();
 
     const request: RequestInfo = new Request(url, {
         credentials: 'include',
@@ -37,7 +54,7 @@ export const getLogs = async(application: any, pod: any, container: string, coun
     let partialData = '';
     let index = 0;
 
-    var results:LogEntry[] = [];
+    var results: LogEntry[] = [];
 
     // Since we use the `tailLines` parameter we don't actually need to count the lines
     // and could just read until done. However just leaving it in for now for
@@ -55,15 +72,19 @@ export const getLogs = async(application: any, pod: any, container: string, coun
         for (const part of parts) {
             try {
                 const jsonObject = JSON.parse(part);
+                console.log("jsonObject");
+                console.log(jsonObject);
                 results.push(jsonObject as LogEntry);
                 index++;
                 if (index > count) break;
             } catch (e) {
                 // Ignore incomplete JSON objects
-                console.log(e);
+                //console.log(e);
             }
         }
     }
+
+    console.log(results);
 
     return results;
 }
