@@ -4,24 +4,14 @@
 
 This is a POC to explore whether it is feasible to add OpenShift Lightspeed to the Argo CD UI.
 
-This POC creates an Argo CD Extension that adds a `Lightspeed` tab to the resources view. It
-does not upload anything to Lightspeed at this time so only general inquiries are
-supported. If this POC progresses then it would be expected that manifests, events and
-pod logs could be uploaded (i.e. attached) to Lightspeed top support specific
-inquiries.
+This POC creates an Argo CD Extension that adds a `Lightspeed` tab to the resources view. it automatically adds manifests and events to the query context and logs can be added through a guided conversation flow.
 
-The Lightspeed service requires the OpenShift user token in the Authorization header but
-unfortunately the Argo CD Proxy Extension strips out this header meaning you can never authenticate to the service. It's also not possible
-to directly call the service due to CORS.
+The Lightspeed service requires the OpenShift user token in the Authorization header.
 
-To workaround this for the POC we leverage the Proxy Extension in Argo CD we use a
+To mansge this for the POC we leverage the Proxy Extension in Argo CD we use a
 token generated from the application-controller service in a secret called `lightspeed-auth-secret`. A script is provided
 that will add the necessary secret key and value to the `argocd-secret`. Unfortunately unlike the OIDC secret
 it doesn't seem possible to reference an external secret here.
-
-Another minor issue is the Proxy Extension will not connect to the Lightspeed internal service as it complains the certificate is from
-an unknown authority. Using a reencrypt route and hitting the route works fine but this means requiring a per-cluster configuration
-for the extension versus just using the service URL for the Argo CD Proxy Extension.
 
 ### Installing POC on Existing Cluster
 
@@ -178,10 +168,6 @@ This POC has a few limitations some of which were mentioned in the intro:
 
 2. Uses the query API rather then the streaming query API which would provide a better experience
 
-3. Attaches events and manifest but not pod logs at this time, not sure how to best handle extremely large pod logs?
+3. The Lightspeed streaming API doesn't work with the Argo CD Proxy Extension, it always returns a single response rather then chunk by chunk as far as I can tell
 
-4. The Lightspeed streaming API doesn't work with the Argo CD Proxy Extension, it always returns a single response rather then chunk by chunk as far as I can tell
-
-5. Formatting of responses needs improvement, need to spend time looking at how console extension is dealing with this
-
-6. No luck getting the proxy extension to access a secret other then the default `argocd-secret` for the openshift token needed for the authorization header which makes setup a bit more complex.
+4. No luck getting the proxy extension to access a secret other then the default `argocd-secret` for the openshift token needed for the authorization header which makes setup a bit more complex.
