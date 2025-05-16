@@ -89,7 +89,19 @@ subjects:
   namespace: openshift-gitops
 ```
 
-5. Install the extension into the Argo CD instance by adding the following:
+5. The extension talks to the Lightspeed Kubernetes service, you will need the Service CA for the Argo CD proxy extension to trust it.
+
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: config-service-cabundle
+  annotations:
+    service.beta.openshift.io/inject-cabundle: true
+data: {}
+```
+
+6. Install the extension into the Argo CD instance by adding the following:
 
 ```
 apiVersion: argoproj.io/v1beta1
