@@ -101,7 +101,7 @@ metadata:
 data: {}
 ```
 
-6. Install the extension into the Argo CD instance by adding the following:
+6. Install the extension into the Argo CD instance by adding the following in the appropriate spots:
 
 ```
 apiVersion: argoproj.io/v1beta1
@@ -110,6 +110,9 @@ metadata:
   name: openshift-gitops
   namespace: openshift-gitops
 spec:
+  rbac:
+    ...
+    p, role:readonly, extensions, invoke, lightspeed, allow
   extraConfig:
     extension.config.lightspeed: |
       connectionTimeout: 2s
