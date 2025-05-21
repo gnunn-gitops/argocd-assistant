@@ -17,19 +17,19 @@
     color: #DFF6F9;
 }
 ul {
-  line-height: 1;
+  line-height: normal;
 }
 ul li {
-  line-height: 0;
+  line-height: normal;
 }
 ul li p {
   line-height: normal;
 }
 ol {
-  line-height: 1;
+  line-height: normal;
 }
 ol li {
-  line-height: 0;
+  line-height: normal;
 }
 ol li p {
   line-height: normal;
