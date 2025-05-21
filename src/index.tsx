@@ -1,11 +1,10 @@
 import * as React from "react";
 import ChatBot, { Options } from "react-chatbotify";
 import {v4 as uuidv4} from 'uuid';
-import * as Showdown from 'showdown';
 
-import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, QueryResponse, SYSTEM_PROMPT} from "./model/service";
-import {query} from "./service/query";
-import {convertToHTML, getContainers, isAttachRequest, isCancelRequest} from "./util/util";
+import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, SYSTEM_PROMPT} from "./model/service";
+import {queryStream} from "./service/query";
+import {getContainers, isAttachRequest, isCancelRequest} from "./util/util";
 import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
 import "./index.css"
 
@@ -20,8 +19,6 @@ export const Extension = (props: any) => {
     const [logs, setLogs] = React.useState<LogEntry[]>([]);
 
     const conversationID = uuidv4();
-
-    const convertor = new Showdown.Converter();
 
     const { resource, application } = props;
 
@@ -49,7 +46,8 @@ export const Extension = (props: any) => {
             storageKey: "lightspeed"
         },
         botBubble: {
-            dangerouslySetInnerHtml: true
+            dangerouslySetInnerHtml: true,
+            simStream: false
         },
         chatWindow: {
             showScrollbar: true
@@ -72,9 +70,7 @@ export const Extension = (props: any) => {
         start: {
             message: "How can I help you with the resource '" + resource_name + "' of type " + resource_kind + "?" + ( hasLogs(resource) ? " I notice this resource has logs available, to attach one or more container logs type 'Attach' at any time.": ""),
 			path: async (params) => {
-                console.log("User input " + params.userInput);
                 if (isAttachRequest(params.userInput) && hasLogs(resource)) {
-                    console.log("This is a pod " + resource_kind);
                     return "attach"
                 } else if (isAttachRequest(params.userInput)) return "no_attach"
                 else return "loop"
@@ -105,8 +101,6 @@ export const Extension = (props: any) => {
                     )
                 }
 
-                console.log("Checking logs");
-                console.log(logs);
                 if (logs?.length > 0 ) {
                     attachments.push(
                         {
@@ -117,8 +111,6 @@ export const Extension = (props: any) => {
                     )
                 }
 
-                console.log("Attachments");
-                console.log(attachments);
                 const queryRequest: QueryRequest = {
                     conversation_id: conversationID,
                     // model: Model.GPT4,
@@ -128,18 +120,15 @@ export const Extension = (props: any) => {
                     attachments: attachments
                 }
                 try {
-                    const result: QueryResponse = await query(queryRequest, application);
-                    if (result.status == 200) return convertToHTML(result.response, convertor);
-                    else return convertor.makeHtml("<p><b>Unexpected Error (" + result.status + ")</b>: " + result.response + "</p>");
+                    await queryStream(queryRequest, application, params);
                 } catch (error) {
                     console.log(error);
-                    return convertor.makeHtml("<p><b>Unexpected Error</b>: " + error.message + "</p>");
+                    return "<p><b>Unexpected Error</b>: " + error.message + "</p>";
                 }
 			},
 			path: async (params) => {
                 console.log("User input " + params.userInput);
                 if (isAttachRequest(params.userInput) && hasLogs(resource)) {
-                    console.log("This is a pod " + resource_kind);
                     return "attach"
                 } else if (isAttachRequest(params.userInput)) {
                     return "no_attach"

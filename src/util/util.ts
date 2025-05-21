@@ -1,3 +1,5 @@
+import { marked, Renderer } from "marked";
+
 export const HttpHeader = {
     CONTENT_TYPE: 'Content-Type',
 };
@@ -58,8 +60,7 @@ export function isCancelRequest(input: string): boolean {
         input.toUpperCase().localeCompare('EXIT', undefined, { sensitivity: 'base' }) == 0;
 }
 
-
-export function getHeaders(application: any): Headers {
+export function getHeaders(application: any, streaming: boolean): Headers {
 
     console.log(application);
 
@@ -74,14 +75,21 @@ export function getHeaders(application: any): Headers {
         "Argocd-Application-Name": `${applicationNamespace}:${applicationName}`,
         "Argocd-Project-Name": `${project}`,
     });
+    if (streaming) {
+        // Needed to get golang's reverse proxy that the Argo CD Extension proxy uses to
+        // flush immediately.
+        // https://github.com/golang/go/issues/41642
+        headers.append('Content-Length','-1');
+    }
     return headers;
 }
 
-export function convertToHTML(response: string, convertor: any): string {
-    return convertor.makeHtml(
-        response.replace(/&/g, "&amp;")
+export function convertToHTML(markdown: string, render: Renderer): string {
+    const sanitized = markdown.replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;"));
+            .replace(/'/g, "&#039;");
+
+    return marked(sanitized, { renderer: render, async: false });
 }

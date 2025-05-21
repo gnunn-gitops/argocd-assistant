@@ -10,3 +10,15 @@
 .rcb-bot-message p {
     margin-bottom: 0em
 }
+ul {
+  line-height: 1;
+}
+ul li {
+  line-height: 0;
+}
+ol {
+  line-height: 1;
+}
+ol li {
+  line-height: 0;
+}

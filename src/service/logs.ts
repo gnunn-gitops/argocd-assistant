@@ -41,7 +41,7 @@ export const getLogs = async (application: any, resource: any, container: string
     const request: RequestInfo = new Request(url, {
         credentials: 'include',
         method: 'GET',
-        headers: getHeaders(application)
+        headers: getHeaders(application, false)
     });
 
     const response = await fetch(request);
