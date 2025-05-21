@@ -10,15 +10,27 @@
 .rcb-bot-message p {
     margin-bottom: 0em
 }
+.rcb-bot-message a {
+    color: #DFF6F9;
+}
+.rcb-bot-message a:hover {
+    color: #DFF6F9;
+}
 ul {
   line-height: 1;
 }
 ul li {
   line-height: 0;
 }
+ul li p {
+  line-height: normal;
+}
 ol {
   line-height: 1;
 }
 ol li {
   line-height: 0;
+}
+ol li p {
+  line-height: normal;
 }

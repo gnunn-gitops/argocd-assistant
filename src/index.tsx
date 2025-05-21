@@ -9,7 +9,15 @@ import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
 import "./index.css"
 
 export const Extension = (props: any) => {
+    const { resource, application } = props;
+
     const [form, setForm] = React.useState({});
+
+    // This doesn't preserve conversationID between tab switches, I suspect
+    // Argo CD reloads the extension
+    const conversationID:string = React.useMemo(() => {
+        return uuidv4()
+    },[resource.kind,resource.metadata?.name,resource.metadata?.namespace]);
 
     const [events, setEvents] = React.useState<Events>({
         apiVersion: "v1",
@@ -17,10 +25,6 @@ export const Extension = (props: any) => {
     });
 
     const [logs, setLogs] = React.useState<LogEntry[]>([]);
-
-    const conversationID = uuidv4();
-
-    const { resource, application } = props;
 
     const containers:string[] = hasLogs(resource) ? getContainers(resource) : [];
     console.log(containers);
