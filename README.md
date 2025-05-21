@@ -133,7 +133,7 @@ spec:
     initContainers:
       - env:
           - name: EXTENSION_URL
-            value: "https://github.com/gnunn-gitops/argocd-lightspeed/releases/download/0.4.0/extension-lightspeed-0.4.0.tar"
+            value: "https://github.com/gnunn-gitops/argocd-lightspeed/releases/download/0.4.1/extension-lightspeed-0.4.1.tar"
         image: "quay.io/argoprojlabs/argocd-extension-installer:v0.0.8"
         name: extension-lightspeed
         securityContext:
