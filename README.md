@@ -181,8 +181,4 @@ This POC has a few limitations some of which were mentioned in the intro:
 
 1. Lightspeed requires an OpenShift user which is not something that Argo CD has any concept of. Working around it by using a token from a service account but longer term would be nice if Lightspeed could accept an Argo CD token and API URL for validation
 
-2. Uses the query API rather then the streaming query API which would provide a better experience
-
-3. The Lightspeed streaming API doesn't work with the Argo CD Proxy Extension, it always returns a single response rather then chunk by chunk as far as I can tell
-
-4. No luck getting the proxy extension to access a secret other then the default `argocd-secret` for the openshift token needed for the authorization header which makes setup a bit more complex.
+2. When MCP comes into play for Lightspeed I'm not sure there is a way to pass the Argo CD user token with the Argo CD extension since it gets scrubbed (https://github.com/argoproj/argo-cd/blob/master/server/extension/extension.go#L511). In the browser the Argo CD token is an http protected cookie so the extension code cannot access it (which makes sense).
