@@ -7,9 +7,11 @@ import {queryStream} from "./service/query";
 import {getContainers, isAttachRequest, isCancelRequest} from "./util/util";
 import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
 import "./index.css"
+import HtmlRenderer, { HtmlRendererBlock } from "@rcb-plugins/html-renderer";
 
 export const Extension = (props: any) => {
     const { resource, application } = props;
+    const plugins = [HtmlRenderer()];
 
     const [form, setForm] = React.useState({});
 
@@ -43,7 +45,16 @@ export const Extension = (props: any) => {
             disabled: true
         },
         chatHistory: {
-            storageKey: "lightspeed"
+            storageKey: "lightspeed",
+            // More management of state needs to be done in this extension, it basically
+            // looks every time a tab is switched the view gets re-loaded. Enabling this switch
+            // brings back the state automatically but if the user attached logs they would lose
+            // though which is confusing.
+            //
+            // Additionally we should clear this storage when a new resource is loaded. I'm wondering
+            // if conversationID and logs need to be stored permanently and cleared out when a new
+            // resource is selected. Also have to consider what happens with multiple windows/browsers.
+            autoLoad: false
         },
         chatWindow: {
             showScrollbar: true
@@ -122,9 +133,10 @@ export const Extension = (props: any) => {
                     await queryStream(queryRequest, application, params);
                 } catch (error) {
                     console.log(error);
-                    return "<p><b>Unexpected Error</b>: " + error.message + "</p>";
+                    return "Unexpected Error: " + error.message + "";
                 }
-			},
+			} ,
+            renderHtml: ["BOT"],
 			path: async (params) => {
                 console.log("User input " + params.userInput);
                 if (isAttachRequest(params.userInput) && hasLogs(resource)) {
@@ -134,7 +146,7 @@ export const Extension = (props: any) => {
                 }
                 else return "loop"
             }
-		},
+		} as HtmlRendererBlock,
         no_attach: {
             message: "Sorry, logs can only be attached for Pod resources.",
             path: "loop"
@@ -172,7 +184,7 @@ export const Extension = (props: any) => {
                     setLogs(result);
                     return "Requested logs have been attached";
                 } catch (error) {
-                    return "<p>Unexpected error: " + error.message + "</p>";
+                    return "Unexpected error: " + error.message;
                 }
             },
             path: "loop"
@@ -200,7 +212,7 @@ export const Extension = (props: any) => {
       }, [application, resource, application_name]);
 
     return (
-    <ChatBot settings={settings} styles={styles} flow={flow} />
+    <ChatBot plugins={plugins} settings={settings} styles={styles} flow={flow} />
     );
 };
 

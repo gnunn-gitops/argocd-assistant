@@ -51,10 +51,13 @@ export function getContainers(resource: any): string[] {
 }
 
 export function isAttachRequest(input: string): boolean {
+    if (input === undefined || input === "") return false;
     return input.toUpperCase().localeCompare('ATTACH', undefined, { sensitivity: 'base' }) == 0;
 }
 
 export function isCancelRequest(input: string): boolean {
+    if (input === undefined || input === "") return false;
+
     return input.toUpperCase().localeCompare('CANCEL', undefined, { sensitivity: 'base' }) == 0 ||
         input.toUpperCase().localeCompare('QUIT', undefined, { sensitivity: 'base' }) == 0 ||
         input.toUpperCase().localeCompare('EXIT', undefined, { sensitivity: 'base' }) == 0;

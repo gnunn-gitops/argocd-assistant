@@ -4,7 +4,9 @@
     "main": "index.js",
     "license": "MIT",
     "peerDeependencies": {
-        "react": ">=16.14.0"
+        "react": ">=16.14.0",
+        "react-dom": ">=16.14.0",
+        "react-chatbotify": ">=2.0.0-beta.37"
     },
     "scripts": {
         "build": "yarn clean && NODE_ENV=production yarn ts-node node_modules/.bin/webpack",
@@ -30,8 +32,9 @@
         "ts-node": "^10.8.1"
     },
     "dependencies": {
+        "@rcb-plugins/html-renderer": "^0.2.0",
         "marked": "^15.0.12",
-        "react-chatbotify": "^2.0.0-beta",
+        "react-chatbotify": "^2.0.0-beta.37",
         "typescript": "^4.9.3",
         "uuid": "^11.1.0",
         "webpack": "^5.75.0",
