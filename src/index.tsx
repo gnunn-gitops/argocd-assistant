@@ -1,5 +1,5 @@
 import * as React from "react";
-import ChatBot, { Options } from "react-chatbotify";
+import ChatBot, { Settings, Styles } from "react-chatbotify";
 import {v4 as uuidv4} from 'uuid';
 
 import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, SYSTEM_PROMPT} from "./model/service";
@@ -33,29 +33,24 @@ export const Extension = (props: any) => {
     const resource_name = resource?.metadata?.name || "";
     const resource_kind = resource?.kind || "";
 
-    const options: Options = {
-        theme: {
-            showHeader: false,
+    const settings: Settings = {
+        general: {
             showFooter: false,
+            showHeader: false,
             embedded: true
-
-        },
-        footer: {
-            text: <span>Powered by OpenShift Lightspeed</span>
         },
         fileAttachment: {
-            disabled: false
+            disabled: true
         },
         chatHistory: {
             storageKey: "lightspeed"
         },
-        botBubble: {
-            dangerouslySetInnerHtml: true,
-            simStream: false
-        },
         chatWindow: {
             showScrollbar: true
-        },
+        }
+    }
+
+    const styles: Styles = {
         chatWindowStyle: {
             width: "100%",
             height: "80vh"
@@ -205,7 +200,7 @@ export const Extension = (props: any) => {
       }, [application, resource, application_name]);
 
     return (
-    <ChatBot options={options} flow={flow} />
+    <ChatBot settings={settings} styles={styles} flow={flow} />
     );
 };
 
