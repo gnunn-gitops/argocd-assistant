@@ -1,6 +1,6 @@
-import { convertToHTML, getHeaders } from "../util/util";
+import { getHeaders } from "../util/util";
 import { QueryRequest } from "../model/service";
-import { marked, Renderer } from "marked";
+//import { marked, Renderer } from "marked";
 
 // export const query = async (query: QueryRequest, application: any): Promise<QueryResponse> => {
 //     const url: string = "/extensions/lightspeed/v1/query"
@@ -44,7 +44,7 @@ import { marked, Renderer } from "marked";
 
 export const queryStream = async (query: QueryRequest, application: any, params: any) => {
 
-    const renderer: Renderer = new marked.Renderer();
+    //const renderer: Renderer = new marked.Renderer();
 
     const url: string = "/extensions/lightspeed/v1/streaming_query"
 
@@ -78,7 +78,7 @@ export const queryStream = async (query: QueryRequest, application: any, params:
       const chunk = decoder.decode(value);
       text += chunk;
       // Process the received chunk (e.g., display it, parse it, etc.)
-      await params.streamMessage(convertToHTML(text, renderer));
+      await params.streamMessage(text);
     }
 
   } catch (error) {

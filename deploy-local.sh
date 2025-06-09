@@ -1,10 +1,10 @@
 # Deploys by copying js file into pod, pod must have had extension previously installed using dev version of package
 
-# NAMESPACE=openshift-gitops
-# LABEL_NAME=openshift-gitops-server
+NAMESPACE=openshift-gitops
+LABEL_NAME=openshift-gitops-server
 
-NAMESPACE=gitops
-LABEL_NAME=argocd-server
+# NAMESPACE=gitops
+# LABEL_NAME=argocd-server
 
 yarn run build-dev
 

@@ -1,6 +1,6 @@
 {
     "name": "lightspeed",
-    "version": "0.4.1",
+    "version": "0.5.0",
     "main": "index.js",
     "license": "MIT",
     "peerDeependencies": {
@@ -32,7 +32,7 @@
         "ts-node": "^10.8.1"
     },
     "dependencies": {
-        "@rcb-plugins/html-renderer": "^0.2.0",
+        "@rcb-plugins/markdown-renderer": "^0.2.0",
         "marked": "^15.0.12",
         "react-chatbotify": "^2.0.0-beta.37",
         "typescript": "^4.9.3",

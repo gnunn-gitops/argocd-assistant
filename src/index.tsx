@@ -7,11 +7,15 @@ import {queryStream} from "./service/query";
 import {getContainers, isAttachRequest, isCancelRequest} from "./util/util";
 import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
 import "./index.css"
-import HtmlRenderer, { HtmlRendererBlock } from "@rcb-plugins/html-renderer";
+//import HtmlRenderer, { HtmlRendererBlock } from "@rcb-plugins/html-renderer";
+
+import MarkdownRenderer, { MarkdownRendererBlock } from "@rcb-plugins/markdown-renderer";
 
 export const Extension = (props: any) => {
     const { resource, application } = props;
-    const plugins = [HtmlRenderer()];
+    //const plugins = [HtmlRenderer()];
+    const plugins = [MarkdownRenderer()];
+
 
     const [form, setForm] = React.useState({});
 
@@ -45,7 +49,8 @@ export const Extension = (props: any) => {
             disabled: true
         },
         chatHistory: {
-            storageKey: "lightspeed",
+            storageKey: "lightspeed-chat-history",
+            storageType: "SESSION_STORAGE",
             // More management of state needs to be done in this extension, it basically
             // looks every time a tab is switched the view gets re-loaded. Enabling this switch
             // brings back the state automatically but if the user attached logs they would lose
@@ -136,7 +141,7 @@ export const Extension = (props: any) => {
                     return "Unexpected Error: " + error.message + "";
                 }
 			} ,
-            renderHtml: ["BOT"],
+            renderMarkdown: ["BOT"],
 			path: async (params) => {
                 console.log("User input " + params.userInput);
                 if (isAttachRequest(params.userInput) && hasLogs(resource)) {
@@ -146,7 +151,7 @@ export const Extension = (props: any) => {
                 }
                 else return "loop"
             }
-		} as HtmlRendererBlock,
+		} as MarkdownRendererBlock,
         no_attach: {
             message: "Sorry, logs can only be attached for Pod resources.",
             path: "loop"
