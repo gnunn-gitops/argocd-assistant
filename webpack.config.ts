@@ -3,7 +3,9 @@
 import { Configuration as WebpackConfiguration } from "webpack";
 import * as path from "path";
 
-const extName = "lightspeed";
+var PACKAGE = require('./package.json');
+var version = PACKAGE.version;
+const extName = PACKAGE.name;
 
 const config: WebpackConfiguration = {
     mode: "development",
@@ -47,7 +49,7 @@ const config: WebpackConfiguration = {
 if (process.env.NODE_ENV === "production") {
     config.mode = "production";
     if (config.output) {
-        config.output.filename = '[name]-bundle-[hash].min.js';
+        config.output.filename = `${extName}-bundle-${version}.min.js`;
         config.output.chunkFilename = '[name]-chunk-[chunkhash].min.js';
     }
     if (config.optimization) {

@@ -41,14 +41,14 @@ export function getResourceIdentifier(resource: any): string {
 
 // Handle anything that is a pod or has a PodSpec template.
 export function getContainers(resource: any): string[] {
-    var result: string[] = [];
+    const result: string[] = [];
     if (resource?.kind === Kinds.POD) {
         try {
             resource.spec.containers.forEach((container) => {
                 result.push(container.name);
             })
         } catch (error) {
-            console.log("This is not a pod")
+            console.log("getContainers: This is not a pod")
         }
     } else if (resource?.spec?.template?.spec?.containers) {
         try {
@@ -56,7 +56,7 @@ export function getContainers(resource: any): string[] {
                 result.push(container.name);
             })
         } catch (error) {
-            console.log("Invalid pod specification")
+            console.log("getContainers: Invalid pod specification")
         }
     }
     return result;

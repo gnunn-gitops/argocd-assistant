@@ -4,7 +4,7 @@ import {v4 as uuidv4} from 'uuid';
 
 import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, SYSTEM_PROMPT} from "./model/service";
 import {queryStream} from "./service/query";
-import {getContainers, getResourceIdentifier, isAttachRequest, isCancelRequest} from "./util/util";
+import { getContainers, getResourceIdentifier, isAttachRequest, isCancelRequest} from "./util/util";
 import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
 import "./index.css"
 
@@ -170,7 +170,7 @@ export const Extension = (props: any) => {
 			path: async (params) => {
                 if (params.userInput)
 				if (isNaN(Number(params.userInput))) {
-					await params.injectMessage("The number of lines needs to be a number!");
+					await params.injectMessage("The number of lines needs to be a valid number.");
 					return;
 				}
                 if (Number(params.userInput) == 0 || Number(params.userInput) > MAX_LINES ) {
