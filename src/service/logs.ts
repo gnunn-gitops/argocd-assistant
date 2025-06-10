@@ -84,7 +84,5 @@ export const getLogs = async (application: any, resource: any, container: string
         }
     }
 
-    console.log(results);
-
     return results;
 }

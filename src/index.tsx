@@ -14,6 +14,7 @@ import MarkedWrapper from "./components/MarkedWrapper";
 
 const CHAT_HISTORY_KEY = "lightspeed-chat-history";
 const RESOURCE_ID_KEY = "lightspeed-resource-id";
+const LOGS_KEY = "lightspeed-logs";
 
 export const Extension = (props: any) => {
     const { resource, application } = props;
@@ -37,10 +38,7 @@ export const Extension = (props: any) => {
         items: []
     });
 
-    const [logs, setLogs] = React.useState<LogEntry[]>([]);
-
     const containers:string[] = hasLogs(resource) ? getContainers(resource) : [];
-    console.log(containers);
 
     const application_name = application?.metadata?.name || "";
     const resource_name = resource?.metadata?.name || "";
@@ -56,16 +54,13 @@ export const Extension = (props: any) => {
             disabled: true
         },
         chatHistory: {
+            disabled: false,
             storageKey: CHAT_HISTORY_KEY,
             storageType: "SESSION_STORAGE",
             // More management of state needs to be done in this extension, it basically
             // looks every time a tab is switched the view gets re-loaded. Enabling this switch
             // brings back the state automatically but if the user attached logs they would lose
             // though which is confusing.
-            //
-            // Additionally we should clear this storage when a new resource is loaded. I'm wondering
-            // if conversationID and logs need to be stored permanently and cleared out when a new
-            // resource is selected. Also have to consider what happens with multiple windows/browsers.
             autoLoad: false
         },
         chatWindow: {
@@ -123,10 +118,10 @@ export const Extension = (props: any) => {
                     )
                 }
 
-                if (logs?.length > 0 ) {
+                if (LOGS_KEY in sessionStorage ) {
                     attachments.push(
                         {
-                            content: JSON.stringify(logs),
+                            content: sessionStorage.getItem(LOGS_KEY),
                             content_type: "application/json",
                             attachment_type: AttachmentTypes.LOG
                         }
@@ -148,7 +143,6 @@ export const Extension = (props: any) => {
 			} ,
             renderMarkdown: ["BOT"],
 			path: async (params) => {
-                console.log("User input " + params.userInput);
                 if (isAttachRequest(params.userInput) && hasLogs(resource)) {
                     return "attach"
                 } else if (isAttachRequest(params.userInput)) {
@@ -191,7 +185,7 @@ export const Extension = (props: any) => {
             message: async(params) => {
                 try {
                     const result:LogEntry[] = await getLogs(application, resource, form["container"], form["lines"]);
-                    setLogs(result);
+                    sessionStorage.setItem(LOGS_KEY, JSON.stringify(result));
                     return "Requested logs have been attached";
                 } catch (error) {
                     return "Unexpected error: " + error.message;
@@ -223,17 +217,15 @@ export const Extension = (props: any) => {
 
     const currentResourceID = sessionStorage.getItem(RESOURCE_ID_KEY)
     const resourceID = getResourceIdentifier(resource);
-    console.log("Current ResourceID: " + currentResourceID);
-    console.log("ResourceID: " + resourceID);
 
     // If a new resource update caches. This is used to handle
     // how Argo CD reloads extension tab when tab switching on resource view.
     // If it's the same resource that was browsed earlier, keep the caches.
     // If it's a different resource clear the caches.
     if (currentResourceID !== resourceID) {
-        console.log("Clear caches");
         sessionStorage.setItem(RESOURCE_ID_KEY, resourceID);
         sessionStorage.removeItem(CHAT_HISTORY_KEY);
+        sessionStorage.removeItem(LOGS_KEY);
     }
 
     return (
