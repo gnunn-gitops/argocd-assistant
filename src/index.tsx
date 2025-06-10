@@ -4,17 +4,24 @@ import {v4 as uuidv4} from 'uuid';
 
 import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, SYSTEM_PROMPT} from "./model/service";
 import {queryStream} from "./service/query";
-import {getContainers, isAttachRequest, isCancelRequest} from "./util/util";
+import {getContainers, getResourceIdentifier, isAttachRequest, isCancelRequest} from "./util/util";
 import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
 import "./index.css"
-//import HtmlRenderer, { HtmlRendererBlock } from "@rcb-plugins/html-renderer";
 
 import MarkdownRenderer, { MarkdownRendererBlock } from "@rcb-plugins/markdown-renderer";
 
+import MarkedWrapper from "./components/MarkedWrapper";
+
+const CHAT_HISTORY_KEY = "lightspeed-chat-history";
+const RESOURCE_ID_KEY = "lightspeed-resource-id";
+
 export const Extension = (props: any) => {
     const { resource, application } = props;
-    //const plugins = [HtmlRenderer()];
-    const plugins = [MarkdownRenderer()];
+    const pluginConfig = {
+        autoConfig: true,
+        markdownComponent: MarkedWrapper
+    }
+    const plugins = [MarkdownRenderer(pluginConfig)];
 
 
     const [form, setForm] = React.useState({});
@@ -49,7 +56,7 @@ export const Extension = (props: any) => {
             disabled: true
         },
         chatHistory: {
-            storageKey: "lightspeed-chat-history",
+            storageKey: CHAT_HISTORY_KEY,
             storageType: "SESSION_STORAGE",
             // More management of state needs to be done in this extension, it basically
             // looks every time a tab is switched the view gets re-loaded. Enabling this switch
@@ -128,8 +135,6 @@ export const Extension = (props: any) => {
 
                 const queryRequest: QueryRequest = {
                     conversation_id: conversationID,
-                    // model: Model.GPT4,
-                    // provider: Provider.OPENSHIFT_AI,
                     query: params.userInput,
                     system_prompt: SYSTEM_PROMPT,
                     attachments: attachments
@@ -215,6 +220,21 @@ export const Extension = (props: any) => {
             console.error("res.data", err);
           });
       }, [application, resource, application_name]);
+
+    const currentResourceID = sessionStorage.getItem(RESOURCE_ID_KEY)
+    const resourceID = getResourceIdentifier(resource);
+    console.log("Current ResourceID: " + currentResourceID);
+    console.log("ResourceID: " + resourceID);
+
+    // If a new resource update caches. This is used to handle
+    // how Argo CD reloads extension tab when tab switching on resource view.
+    // If it's the same resource that was browsed earlier, keep the caches.
+    // If it's a different resource clear the caches.
+    if (currentResourceID !== resourceID) {
+        console.log("Clear caches");
+        sessionStorage.setItem(RESOURCE_ID_KEY, resourceID);
+        sessionStorage.removeItem(CHAT_HISTORY_KEY);
+    }
 
     return (
     <ChatBot plugins={plugins} settings={settings} styles={styles} flow={flow} />

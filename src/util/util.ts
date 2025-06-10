@@ -27,6 +27,18 @@ export const ContentType = {
     MULTIPART_FORM_DATA: 'multipart/form-data',
 } as const;
 
+// Used to generate a unique identifier for any resource to be used as a key
+// for caching
+export function getResourceIdentifier(resource: any): string {
+    if (resource == undefined) return "Undefined";
+    console.log(resource);
+
+    const namespace = resource.metadata.namespace != undefined?resource.metadata.namespace:"";
+    const version = resource.apiVersion !=undefined?resource.apiVersion.replace(/\//g, "-"):"";
+
+    return version + "-" + resource.metadata.kind + "-" + namespace + "-" + resource.metadata.name;
+}
+
 // Handle anything that is a pod or has a PodSpec template.
 export function getContainers(resource: any): string[] {
     var result: string[] = [];
