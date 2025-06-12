@@ -49,7 +49,7 @@ const config: WebpackConfiguration = {
 if (process.env.NODE_ENV === "production") {
     config.mode = "production";
     if (config.output) {
-        config.output.filename = `${extName}-bundle-${version}.min.js`;
+        config.output.filename = `extension-${extName}-bundle-${version}.min.js`;
         config.output.chunkFilename = '[name]-chunk-[chunkhash].min.js';
     }
     if (config.optimization) {

@@ -1,20 +1,24 @@
 import * as React from "react";
-import ChatBot, { Settings, Styles } from "react-chatbotify";
+import ChatBot, { Flow, Settings, Styles } from "react-chatbotify";
 import {v4 as uuidv4} from 'uuid';
 
 import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, SYSTEM_PROMPT} from "./model/service";
 import {queryStream} from "./service/query";
 import { getContainers, getResourceIdentifier, isAttachRequest, isCancelRequest} from "./util/util";
 import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
-import "./index.css"
 
 import MarkdownRenderer, { MarkdownRendererBlock } from "@rcb-plugins/markdown-renderer";
 
 import MarkedWrapper from "./components/MarkedWrapper";
+//import ErrorMessage from "./components/ErrorMessage";
+
+import "./index.css"
 
 const CHAT_HISTORY_KEY = "lightspeed-chat-history";
 const RESOURCE_ID_KEY = "lightspeed-resource-id";
 const LOGS_KEY = "lightspeed-logs";
+
+//const TOAST_TIMEOUT = 10000;
 
 export const Extension = (props: any) => {
     const { resource, application } = props;
@@ -61,7 +65,7 @@ export const Extension = (props: any) => {
             // looks every time a tab is switched the view gets re-loaded. Enabling this switch
             // brings back the state automatically but if the user attached logs they would lose
             // though which is confusing.
-            autoLoad: false
+            autoLoad: true
         },
         chatWindow: {
             showScrollbar: true
@@ -83,10 +87,10 @@ export const Extension = (props: any) => {
         }
     }
 
-    const flow = {
+    const flow:Flow = {
         start: {
             message: "How can I help you with the resource '" + resource_name + "' of type " + resource_kind + "?" + ( hasLogs(resource) ? " I notice this resource has logs available, to attach one or more container logs type 'Attach' at any time.": ""),
-			path: async (params) => {
+            path: async (params) => {
                 if (isAttachRequest(params.userInput) && hasLogs(resource)) {
                     return "attach"
                 } else if (isAttachRequest(params.userInput)) return "no_attach"
@@ -170,6 +174,7 @@ export const Extension = (props: any) => {
 			path: async (params) => {
                 if (params.userInput)
 				if (isNaN(Number(params.userInput))) {
+                    // params.showToast(ErrorMessage({title: "Invalid Input", message: "The number of lines needs to be a valid number"}), TOAST_TIMEOUT);
 					await params.injectMessage("The number of lines needs to be a valid number.");
 					return;
 				}
