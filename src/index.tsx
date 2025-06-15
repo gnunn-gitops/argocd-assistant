@@ -48,6 +48,19 @@ export const Extension = (props: any) => {
     const resource_name = resource?.metadata?.name || "";
     const resource_kind = resource?.kind || "";
 
+    const currentResourceID = sessionStorage.getItem(RESOURCE_ID_KEY)
+    const resourceID = getResourceIdentifier(resource);
+
+    // If a new resource update caches. This is used to handle
+    // how Argo CD reloads extension tab when tab switching on resource view.
+    // If it's the same resource that was browsed earlier, keep the caches.
+    // If it's a different resource clear the caches.
+    if (currentResourceID !== resourceID) {
+        sessionStorage.setItem(RESOURCE_ID_KEY, resourceID);
+        sessionStorage.removeItem(CHAT_HISTORY_KEY);
+        sessionStorage.removeItem(LOGS_KEY);
+    }
+
     const settings: Settings = {
         general: {
             showFooter: false,
@@ -89,7 +102,15 @@ export const Extension = (props: any) => {
 
     const flow:Flow = {
         start: {
-            message: "How can I help you with the resource '" + resource_name + "' of type " + resource_kind + "?" + ( hasLogs(resource) ? " I notice this resource has logs available, to attach one or more container logs type 'Attach' at any time.": ""),
+            message: (params) => {
+                if (!(CHAT_HISTORY_KEY in sessionStorage)) {
+                    params.injectMessage("How can I help you with the resource '" +
+                                          resource_name +
+                                          "' of type " +
+                                          resource_kind + "?" +
+                                          ( hasLogs(resource) ? " I notice this resource has logs available, to attach one or more container logs type 'Attach' at any time.": ""));
+                }
+            },
             path: async (params) => {
                 if (isAttachRequest(params.userInput) && hasLogs(resource)) {
                     return "attach"
@@ -219,19 +240,6 @@ export const Extension = (props: any) => {
             console.error("res.data", err);
           });
       }, [application, resource, application_name]);
-
-    const currentResourceID = sessionStorage.getItem(RESOURCE_ID_KEY)
-    const resourceID = getResourceIdentifier(resource);
-
-    // If a new resource update caches. This is used to handle
-    // how Argo CD reloads extension tab when tab switching on resource view.
-    // If it's the same resource that was browsed earlier, keep the caches.
-    // If it's a different resource clear the caches.
-    if (currentResourceID !== resourceID) {
-        sessionStorage.setItem(RESOURCE_ID_KEY, resourceID);
-        sessionStorage.removeItem(CHAT_HISTORY_KEY);
-        sessionStorage.removeItem(LOGS_KEY);
-    }
 
     return (
     <ChatBot plugins={plugins} settings={settings} styles={styles} flow={flow} />
