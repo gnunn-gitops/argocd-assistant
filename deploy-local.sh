@@ -8,6 +8,7 @@ LABEL_NAME=openshift-gitops-server
 
 VERSION=$(node -p -e "require('./package.json').version")
 
+# yarn run build-dev
 yarn run build
 
 POD=$(oc get pod -l app.kubernetes.io/name=$LABEL_NAME -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
@@ -19,3 +20,5 @@ oc exec -it -n openshift-gitops ${POD} -c argocd-server -- bash -c "rm -rf /tmp/
 echo "Copying to pod $POD"
 
 oc cp dist/resources/extensions-lightspeed/extension-lightspeed-bundle-${VERSION}.min.js $NAMESPACE/$POD:/tmp/extensions/resources/extensions-lightspeed/extension-lightspeed-bundle-${VERSION}.min.js
+
+# oc cp dist/resources/extensions-lightspeed/extensions-lightspeed.js $NAMESPACE/$POD:/tmp/extensions/resources/extensions-lightspeed/extensions-lightspeed.js
