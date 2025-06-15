@@ -35,7 +35,7 @@
         "@rcb-plugins/markdown-renderer": "^0.2.0",
         "dompurify": "^3.2.6",
         "marked": "^15.0.12",
-        "react-chatbotify": "^2.0.0-beta.37",
+        "react-chatbotify": "^2.1.0",
         "typescript": "^4.9.3",
         "uuid": "^11.1.0",
         "webpack": "^5.75.0",
