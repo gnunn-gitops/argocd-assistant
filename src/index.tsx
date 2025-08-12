@@ -2,7 +2,7 @@ import * as React from "react";
 import ChatBot, { Flow, Settings, Styles } from "react-chatbotify";
 import {v4 as uuidv4} from 'uuid';
 
-import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest, SYSTEM_PROMPT} from "./model/service";
+import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest} from "./model/service";
 import {queryStream} from "./service/query";
 import { getContainers, getResourceIdentifier, isAttachRequest, isCancelRequest} from "./util/util";
 import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
@@ -156,7 +156,6 @@ export const Extension = (props: any) => {
                 const queryRequest: QueryRequest = {
                     conversation_id: conversationID,
                     query: params.userInput,
-                    system_prompt: SYSTEM_PROMPT,
                     attachments: attachments
                 }
                 try {
@@ -249,5 +248,5 @@ export const Extension = (props: any) => {
 export const component = Extension;
 
 ((window: any) => {
-    window?.extensionsAPI?.registerResourceExtension(component, '**', '*', 'Lightspeed', { icon: 'fa-sharp fa-light fa-message fa-lg' });
+    window?.extensionsAPI?.registerResourceExtension(component, '**', '*', 'Assistant', { icon: 'fa-sharp fa-light fa-message fa-lg' });
 })(window);

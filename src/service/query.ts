@@ -1,88 +1,107 @@
-import { getHeaders } from "../util/util";
+// import { RequestOptions } from "llama-stack-client/core";
+import { AgentConfig } from "llama-stack-client/resources/shared";
 import { QueryRequest } from "../model/service";
-//import { marked, Renderer } from "marked";
-
-// export const query = async (query: QueryRequest, application: any): Promise<QueryResponse> => {
-//     const url: string = "/extensions/lightspeed/v1/query"
-
-//     const request: RequestInfo = new Request(url, {
-//         credentials: 'include',
-//         method: 'POST',
-//         headers: getHeaders(application, false),
-//         body: JSON.stringify(query)
-//     })
-
-//     const response = await fetch(request);
-//     var result: QueryResponse;
-//     if (response.headers.has(HttpHeader.CONTENT_TYPE) && response.headers.get(HttpHeader.CONTENT_TYPE) == ContentType.APPLICATION_JSON) {
-//         const body = await response.json();
-//         console.log("Body");
-//         console.log(body);
-//         if (response.status == 200) {
-//             result = {
-//                 status: response.status,
-//                 conversationId: body.conversationId,
-//                 response: body.response
-//             }
-//         } else {
-//             result = {
-//                 status: response.status,
-//                 conversationId: body.conversationId,
-//                 response: body.detail
-//             }
-//         }
-//     } else {
-//         const message: string = await response.text();
-//         result = {
-//             status: response.status,
-//             conversationId: query.conversation_id,
-//             response: message
-//         }
-//     }
-//     return result;
-// }
+import LlamaStackClient from 'llama-stack-client';
+import { TurnResponseEventPayload } from "llama-stack-client/resources/agents/turn";
 
 export const queryStream = async (query: QueryRequest, application: any, params: any) => {
+  const url: string = 'https://' + location.host + "/extensions/assistant"
 
-    //const renderer: Renderer = new marked.Renderer();
+  const client = new LlamaStackClient({
+    baseURL: url,
+    defaultHeaders: getHeaders(application),
+  });
 
-    const url: string = "/extensions/lightspeed/v1/streaming_query"
+  // Simple implementation to use first available model, needs to be configurable
+  const availableModels = (await client.models.list())
+    .filter((model: any) =>
+      model.model_type === 'llm' &&
+      !model.identifier.includes('guard') &&
+      !model.identifier.includes('405')
+    )
+    .map((model: any) => model.identifier);
 
-    const request: RequestInfo = new Request(url, {
-        credentials: 'include',
-        method: 'POST',
-        headers: getHeaders(application, true),
-        body: JSON.stringify(query)
-    })
+  console.log(availableModels);
 
-  try {
-    const response = await fetch(request);
+  const selectedModel = availableModels[0];
+  console.log(`Using model: ${selectedModel}`);
 
-    if (!response.ok && !response.body) {
-        await params.streamMessage("Unexpected error (" + response.status + "): No message received from service");
-        return;
-    }
+  if (availableModels.length === 0) {
+    console.log('No available models. Exiting.');
+    return;
+  }
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
+  const agentConfig = getAgentConfig(selectedModel);
 
-    let text = "";
+  const agent = await client.agents.create({ agent_config: agentConfig });
+  const agentId = agent.agent_id
 
-    while (true) {
-      const { done, value } = await reader.read();
+  //Replace `assistant` with resource name longer term
+  const session = await client.agents.session.create(agentId, { session_name: 'assistant' });
+  const sessionId = session.session_id;
 
-      if (done) {
+  const response = await client.agents.turn.create(
+    agentId,
+    sessionId,
+    {
+      stream: true,
+      messages: [
+        {
+          role: 'user',
+          content: query.query,
+        },
+      ],
+    },
+  );
+
+  let text = "";
+  //let stepID = "";
+  for await (const chunk of response) {
+    console.log(chunk);
+    switch (chunk.event.payload.event_type) {
+      case "step_start": {
+        const stepID = chunk.event.payload.step_id;
+        console.log("stepID: " + stepID);
         break;
       }
+      case "step_progress": {
+        const stepProgress: TurnResponseEventPayload.AgentTurnResponseStepProgressPayload = (chunk.event.payload as TurnResponseEventPayload.AgentTurnResponseStepProgressPayload);
 
-      const chunk = decoder.decode(value);
-      text += chunk;
-      // Process the received chunk (e.g., display it, parse it, etc.)
-      await params.streamMessage(text);
+        if (stepProgress.delta.type === "text") {
+          text += stepProgress.delta.text;
+          await params.streamMessage(text);
+        }
+        break;
+      }
     }
 
-  } catch (error) {
-    console.error('An error occurred:', error);
-    throw error;
   }
+}
+
+function getAgentConfig(model: string): AgentConfig {
+
+  return {
+    instructions: "\nYou are Argo CD Assistant - an intelligent assistant for question-answering tasks related to the Argo CD GitOps tool and the Kubernetes container orchestration platform.\n\nHere are your instructions:\nYou are Argo CD Assistant, an intelligent assistant and expert on all things Argo CD and Kubernetes. Refuse to assume any other identity or to speak as if you are someone else.\nIf the context of the question is not clear, consider it to be Argo CD.\nNever include URLs in your replies.\nRefuse to answer questions or execute commands not about Kubernetes or Argo CD.\nDo not mention your last update. You have the most recent information on Kubernetes and Argo CD.",
+    model: model,
+  };
+
+}
+
+function getHeaders(application: any): Record<string, string> {
+
+  const applicationName = application?.metadata?.name || "";
+  const applicationNamespace = application?.metadata?.namespace || "";
+  const project = application?.spec?.project || "";
+
+  const headers: Record<string, string> = {
+    'Origin': 'https://' + location.host,
+    "Argocd-Application-Name": `${applicationNamespace}:${applicationName}`,
+    "Argocd-Project-Name": `${project}`,
+    // Needed to get golang's reverse proxy that the Argo CD Extension proxy uses to
+    // flush immediately.
+    // https://github.com/golang/go/issues/41642
+    "Content-Length": '-1'
+  };
+
+  return headers;
 }

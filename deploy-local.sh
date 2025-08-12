@@ -15,10 +15,14 @@ POD=$(oc get pod -l app.kubernetes.io/name=$LABEL_NAME -o jsonpath="{.items[0].m
 
 echo "Deleting existing version of extension"
 
-oc exec -it -n openshift-gitops ${POD} -c argocd-server -- bash -c "rm -rf /tmp/extensions/resources/extensions-lightspeed/*"
+oc exec -it -n openshift-gitops ${POD} -c argocd-server -- bash -c "rm -rf /tmp/extensions/resources/extensions-assistant/*"
+
+echo "Make sure directory exists"
+
+oc exec -it -n openshift-gitops ${POD} -c argocd-server -- bash -c "mkdir -p /tmp/extensions/resources"
 
 echo "Copying to pod $POD"
 
-oc cp dist/resources/extensions-lightspeed/extension-lightspeed-bundle-${VERSION}.min.js $NAMESPACE/$POD:/tmp/extensions/resources/extensions-lightspeed/extension-lightspeed-bundle-${VERSION}.min.js
+oc cp dist/resources/extensions-assistant/extension-assistant-bundle-${VERSION}.min.js $NAMESPACE/$POD:/tmp/extensions/resources/extension-lightspeed-bundle-${VERSION}.min.js
 
 # oc cp dist/resources/extensions-lightspeed/extensions-lightspeed.js $NAMESPACE/$POD:/tmp/extensions/resources/extensions-lightspeed/extensions-lightspeed.js
