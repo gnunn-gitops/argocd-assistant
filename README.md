@@ -62,6 +62,12 @@ spec:
         emptyDir: {}
 ```
 
+# Development
+
+I have not figured out a way to develop it hot (i.e. run the code locally and interact with live code) so I use the script `deploy-local.sh` to build and copy the extension into
+a running Argo CD. Tweak the NAMESPACE and LABEL_NAME environment variables to match your instance of Argo CD. Note the LABEL_NAME needs to be a unique label on the
+Argo CD server component.
+
 # Limitations
 
 This MVP has some limitations as follows:
