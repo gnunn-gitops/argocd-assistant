@@ -70,13 +70,9 @@ export class LlamaStackProvider implements QueryProvider {
         );
 
         let text = "";
-        //let stepID = "";
         for await (const chunk of response) {
-            console.log(chunk);
             switch (chunk.event.payload.event_type) {
                 case "step_start": {
-                    const stepID = chunk.event.payload.step_id;
-                    console.log("stepID: " + stepID);
                     break;
                 }
                 case "step_progress": {
@@ -89,12 +85,13 @@ export class LlamaStackProvider implements QueryProvider {
                     break;
                 }
             }
-
         }
+        //console.log(text);
 
         return {success:true, conversationID: sessionID}
     }
 
+    // TODO: This needs to be configurable
     getAgentConfig(model: string): AgentConfig {
 
         return {
