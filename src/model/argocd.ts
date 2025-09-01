@@ -23,3 +23,19 @@ export interface Node extends NodeBase {
 export interface Tree {
     nodes: Node[];
 }
+
+export type Events = {
+    apiVersion: string,
+    items: any[]
+}
+
+// Copied from Argo CD UI code
+export interface LogEntry {
+    content: string;
+    timeStamp: string;
+    // first field is inferred on the fly and indicates first log line received from backend
+    first?: boolean;
+    last: boolean;
+    timeStampStr: string;
+    podName: string;
+}

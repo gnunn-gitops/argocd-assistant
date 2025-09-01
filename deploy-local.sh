@@ -1,4 +1,5 @@
-# Deploys by copying js file into pod, pod must have had extension previously installed using dev version of package
+# Deploys by copying js file into pod to make it faster for round-trip development,
+# haven't figured out yet how to live code the extension outside the pod.
 
 # NAMESPACE=openshift-gitops
 # LABEL_NAME=openshift-gitops-server

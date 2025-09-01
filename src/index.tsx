@@ -1,42 +1,102 @@
+import MarkdownRenderer, { MarkdownRendererBlock } from "@rcb-plugins/markdown-renderer";
 import * as React from "react";
 import ChatBot, { Flow, Settings, Styles } from "react-chatbotify";
-import {v4 as uuidv4} from 'uuid';
-
-import {Attachment, AttachmentTypes, Events, LogEntry, QueryRequest} from "./model/service";
-import {queryStream} from "./service/query";
-import { getContainers, getResourceIdentifier, isAttachRequest, isCancelRequest} from "./util/util";
-import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
-
-import MarkdownRenderer, { MarkdownRendererBlock } from "@rcb-plugins/markdown-renderer";
-
 import MarkedWrapper from "./components/MarkedWrapper";
-//import ErrorMessage from "./components/ErrorMessage";
+import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
+import { getContainers, getResourceIdentifier, isAttachRequest, isCancelRequest, QueryContextImpl } from "./util/util";
+import { Events, LogEntry } from "./model/argocd";
+import { Attachment, AttachmentType, QueryProvider, QueryResponse } from "./model/provider";
+import { createProvider, Provider } from "./providers/providerFactory";
 
-import "./index.css"
+// Where the chat is stored in session storage.
+const CHAT_HISTORY_KEY = "argocd-assistant-chat-history";
 
-const CHAT_HISTORY_KEY = "lightspeed-chat-history";
-const RESOURCE_ID_KEY = "lightspeed-resource-id";
-const LOGS_KEY = "lightspeed-logs";
+// Where the resource namespace-name is stored in session storage. This
+// is used to track the currently viewed resource and is used to
+// either reload the context on a tab switch or discard it when
+// a new resource is viewed.
+const RESOURCE_ID_KEY = "argocd-assistant-resource-id";
 
-//const TOAST_TIMEOUT = 10000;
+// Where the logs are stored, logs are loaded once and cached. To refresh
+// the logs the user can simply fetch them again. Might make this simpler
+// in the future with a guided conversation.
+const LOGS_KEY = "argocd-assistant-logs";
 
+const CONVERSATION_ID_KEY = "argocd-assistant-conversation-id";
+
+const DATA_KEY = "argocd-assistant-data";
+
+/**
+ * Settings used for chatbotify component
+ */
+const CHAT_SETTINGS: Settings = {
+    general: {
+        showFooter: false,
+        showHeader: false,
+        embedded: true
+    },
+    fileAttachment: {
+        disabled: true
+    },
+    chatHistory: {
+        disabled: false,
+        storageKey: CHAT_HISTORY_KEY,
+        storageType: "SESSION_STORAGE",
+        // More management of state needs to be done in this extension, it basically
+        // looks every time a tab is switched the view gets re-loaded. Enabling this switch
+        // brings back the state automatically but if the user attached logs they would lose
+        // though which is confusing.
+        autoLoad: true
+    },
+    chatWindow: {
+        showScrollbar: true
+    }
+}
+
+/**
+ * Styles used for chatbotify component, tried to match styles to
+ * Argo CD colors.
+ */
+const CHAT_STYLES: Styles = {
+    chatWindowStyle: {
+        width: "100%",
+        // TODO: Figure out how to make this 100% without overflowing, using 80vh is a hacky
+        // way to fix the overflow problem and possibly could break if users are scaling the UI
+        height: "80vh"
+    },
+    botBubbleStyle: {
+        backgroundColor: "#6D7F8B",
+        color: "#F8F8FB"
+    },
+    userBubbleStyle: {
+        background: "#00A2B3",
+        color: "#ffffff"
+    }
+}
+
+/**
+ * The extension component that is loaded in Argo CD for the ChatBot.
+ *
+ * @param props The parameters passed by Argo CD when loading.
+ */
 export const Extension = (props: any) => {
+
+    const provider: QueryProvider = createProvider(Provider.LLAMA_STACK);
+
+    // Extract the resource and application passed to the extension
     const { resource, application } = props;
+
+    // Configure chatbotify for MarkedDown rendering
     const pluginConfig = {
         autoConfig: true,
         markdownComponent: MarkedWrapper
     }
     const plugins = [MarkdownRenderer(pluginConfig)];
 
-
+    // Form used for guided conversation flow to load logs
     const [form, setForm] = React.useState({});
 
-    // This doesn't preserve conversationID between tab switches, I suspect
-    // Argo CD reloads the extension
-    const conversationID:string = React.useMemo(() => {
-        return uuidv4()
-    },[resource.kind,resource.metadata?.name,resource.metadata?.namespace]);
-
+    // Used to load events
     const [events, setEvents] = React.useState<Events>({
         apiVersion: "v1",
         items: []
@@ -59,47 +119,11 @@ export const Extension = (props: any) => {
         sessionStorage.setItem(RESOURCE_ID_KEY, resourceID);
         sessionStorage.removeItem(CHAT_HISTORY_KEY);
         sessionStorage.removeItem(LOGS_KEY);
+        sessionStorage.removeItem(CONVERSATION_ID_KEY);
+        sessionStorage.removeItem(DATA_KEY);
     }
 
-    const settings: Settings = {
-        general: {
-            showFooter: false,
-            showHeader: false,
-            embedded: true
-        },
-        fileAttachment: {
-            disabled: true
-        },
-        chatHistory: {
-            disabled: false,
-            storageKey: CHAT_HISTORY_KEY,
-            storageType: "SESSION_STORAGE",
-            // More management of state needs to be done in this extension, it basically
-            // looks every time a tab is switched the view gets re-loaded. Enabling this switch
-            // brings back the state automatically but if the user attached logs they would lose
-            // though which is confusing.
-            autoLoad: true
-        },
-        chatWindow: {
-            showScrollbar: true
-        }
-    }
-
-    const styles: Styles = {
-        chatWindowStyle: {
-            width: "100%",
-            height: "80vh"
-        },
-        botBubbleStyle: {
-            backgroundColor: "#6D7F8B",
-            color: "#F8F8FB"
-        },
-        userBubbleStyle: {
-            background: "#00A2B3",
-            color: "#ffffff"
-        }
-    }
-
+    // The conversation flow for the chatbot
     const flow:Flow = {
         start: {
             message: (params) => {
@@ -118,7 +142,7 @@ export const Extension = (props: any) => {
                 else return "loop"
             }
         },
-		loop: {
+        loop: {
             message: async (params) => {
 
                 const attachments: Attachment[] = [];
@@ -127,8 +151,8 @@ export const Extension = (props: any) => {
                     attachments.push(
                         {
                             content: JSON.stringify(resource),
-                            content_type: "application/json",
-                            attachment_type: AttachmentTypes.MANIFEST
+                            mimeType: "application/json",
+                            type: AttachmentType.MANIFEST
                         }
                     )
                 }
@@ -137,8 +161,8 @@ export const Extension = (props: any) => {
                     attachments.push(
                         {
                             content: JSON.stringify(events),
-                            content_type: "application/json",
-                            attachment_type: AttachmentTypes.EVENTS
+                            mimeType: "application/json",
+                            type: AttachmentType.EVENTS
                         }
                     )
                 }
@@ -147,26 +171,31 @@ export const Extension = (props: any) => {
                     attachments.push(
                         {
                             content: sessionStorage.getItem(LOGS_KEY),
-                            content_type: "application/json",
-                            attachment_type: AttachmentTypes.LOG
+                            mimeType: "application/json",
+                            type: AttachmentType.LOG
                         }
                     )
                 }
 
-                const queryRequest: QueryRequest = {
-                    conversation_id: conversationID,
-                    query: params.userInput,
-                    attachments: attachments
-                }
+                const conversationID = (CONVERSATION_ID_KEY in sessionStorage ) ? sessionStorage.getItem(CONVERSATION_ID_KEY) : undefined;
+                const data = (DATA_KEY in sessionStorage ) ? sessionStorage.getItem(DATA_KEY) : undefined;
+
+                const context = new QueryContextImpl(application, conversationID, data, attachments);
+
+                console.log(context);
+
                 try {
-                    await queryStream(queryRequest, application, params);
+                    const response: QueryResponse = await provider.query(context, params.userInput, params );
+                    if (response.conversationID !== undefined) sessionStorage.setItem(CONVERSATION_ID_KEY, response.conversationID);
+                    if (response.data !== undefined) sessionStorage.setItem(DATA_KEY, response.data);
                 } catch (error) {
                     console.log(error);
                     return "Unexpected Error: " + error.message + "";
                 }
-			} ,
+
+            } ,
             renderMarkdown: ["BOT"],
-			path: async (params) => {
+            path: async (params) => {
                 if (isAttachRequest(params.userInput) && hasLogs(resource)) {
                     return "attach"
                 } else if (isAttachRequest(params.userInput)) {
@@ -174,37 +203,37 @@ export const Extension = (props: any) => {
                 }
                 else return "loop"
             }
-		} as MarkdownRendererBlock,
+        } as MarkdownRendererBlock,
         no_attach: {
             message: "Sorry, logs can only be attached for Pod resources.",
             path: "loop"
         },
         attach: {
             message: "Select the single container for which to attach the logs:",
-			checkboxes: {items: containers, min: 1, max: 1},
+            checkboxes: {items: containers, min: 1, max: 1},
             chatDisabled: true,
             function: (params) => setForm({...form, container: params.userInput}),
             path: "ask_lines"
         },
         ask_lines: {
-			message: "How many lines of the log did you want to attach (max " + MAX_LINES + ")?",
-			function: (params) => {
+            message: "How many lines of the log did you want to attach (max " + MAX_LINES + ")?",
+            function: (params) => {
                 setForm({...form, lines: params.userInput});
             },
-			path: async (params) => {
+            path: async (params) => {
                 if (params.userInput)
-				if (isNaN(Number(params.userInput))) {
+                if (isNaN(Number(params.userInput))) {
                     // params.showToast(ErrorMessage({title: "Invalid Input", message: "The number of lines needs to be a valid number"}), TOAST_TIMEOUT);
-					await params.injectMessage("The number of lines needs to be a valid number.");
-					return;
-				}
+                    await params.injectMessage("The number of lines needs to be a valid number.");
+                    return;
+                }
                 if (Number(params.userInput) == 0 || Number(params.userInput) > MAX_LINES ) {
-					await params.injectMessage("The number of lines needs to be more then 0 and " + MAX_LINES + " or less");
-					return;
+                    await params.injectMessage("The number of lines needs to be more then 0 and " + MAX_LINES + " or less");
+                    return;
                 }
                 if (isCancelRequest(params.userInput)) return "start";
-				return "get_logs";
-			}
+                return "get_logs";
+            }
         },
         get_logs: {
             message: async(params) => {
@@ -241,9 +270,10 @@ export const Extension = (props: any) => {
       }, [application, resource, application_name]);
 
     return (
-    <ChatBot plugins={plugins} settings={settings} styles={styles} flow={flow} />
+    <ChatBot plugins={plugins} settings={CHAT_SETTINGS} styles={CHAT_STYLES} flow={flow} />
     );
-};
+
+}
 
 export const component = Extension;
 

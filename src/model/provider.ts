@@ -20,7 +20,26 @@ export type Events = {
     items: any[]
 }
 
+export enum AttachmentType {
+    EVENTS = 0,
+    LOG = 1,
+    MANIFEST = 2
+}
+
+export type Attachment = {
+    content: string;
+    mimeType: string;
+    type: AttachmentType;
+}
+
 export interface QueryContext {
+
+    /**
+     * The Argo CD Application that this resource belongs to, this passes an
+     * Object that is the Kubernetes Application resource.
+     */
+    get application(): any;
+
     /**
      * The ID that is used to track this specific conversation. A conversation
      * is scoped to a specific named Argo CD Resource. The provider can modify
@@ -35,22 +54,12 @@ export interface QueryContext {
     get data(): any;
 
     /**
-     * The resource manifest, aka YAML, for which questions are being asked
+     * Available attachments (aka Documents) that can be used to provide
+     * additional context for the back-end query. Generally the resource manifest and
+     * events will always be available. Logs are provided on request as directed by
+     * the user.
      */
-    get resource(): string;
-
-    /**
-     * The Argo CD Application that the resource is a part of.
-     */
-    get application(): any;
-
-    /**
-     *  Kubernetes events for the resource, note this is not dynamically
-     * updated at this time.
-     */
-    get events(): Events;
-
-    get logs(): Logs[];
+    get attachments(): Attachment[];
 }
 
 export type QueryError = {

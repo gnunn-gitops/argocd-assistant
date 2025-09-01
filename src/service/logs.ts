@@ -1,4 +1,4 @@
-import { LogEntry } from "src/model/service";
+import { LogEntry } from "src/model/argocd";
 import { getHeaders, Kinds } from "../util/util";
 
 export const MAX_LINES = 250;

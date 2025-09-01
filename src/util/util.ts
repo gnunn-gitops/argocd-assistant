@@ -1,4 +1,5 @@
 import { marked, Renderer } from "marked";
+import { Attachment, QueryContext } from "src/model/provider";
 
 export const HttpHeader = {
     CONTENT_TYPE: 'Content-Type',
@@ -26,6 +27,43 @@ export const ContentType = {
     APPLICATION_FORM_URLENCODED: 'application/x-www-form-urlencoded',
     MULTIPART_FORM_DATA: 'multipart/form-data',
 } as const;
+
+export type Events = {
+    apiVersion: string,
+    items: any[]
+}
+
+
+
+export class QueryContextImpl implements QueryContext {
+    private _application: any;
+    private _conversationID: string;
+    private _data: any;
+    private _attachments: Attachment[];
+
+    constructor(application: any, conversationID: string, data: any, attachments: Attachment[]) {
+        this._application = application;
+        this._conversationID = conversationID;
+        this._data = data;
+        this._attachments = attachments;
+    }
+
+    get application(): any {
+        return this._application;
+    }
+
+    get conversationID(): string {
+        return this._conversationID;
+    }
+
+    get data(): any {
+        return this._data;
+    }
+
+    get attachments(): Attachment[] {
+        return this._attachments;
+    }
+}
 
 // Used to generate a unique identifier for any resource to be used as a key
 // for caching

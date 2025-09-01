@@ -1,10 +1,10 @@
 import { Params } from "react-chatbotify";
 
-import { QueryContext, QueryProvider, QueryResponse } from "../model/provider";
+import { Attachment, QueryContext, QueryProvider, QueryResponse } from "../model/provider";
 
 import { AgentConfig } from "llama-stack-client/resources/shared";
 import LlamaStackClient from 'llama-stack-client';
-import { TurnResponseEventPayload } from "llama-stack-client/resources/agents/turn";
+import { TurnCreateParams, TurnResponseEventPayload } from "llama-stack-client/resources/agents/turn";
 
 export class LlamaStackProvider implements QueryProvider {
 
@@ -55,6 +55,11 @@ export class LlamaStackProvider implements QueryProvider {
             sessionID,
             {
                 stream: true,
+                documents: context.attachments.map<TurnCreateParams.Document>((item: Attachment) => {
+                    // Workaround application/json mimetype issue
+                    // https://github.com/llamastack/llama-stack/issues/3300
+                    return {content: item.content, mime_type: (item.mimeType === "application/json") ? "text/json": item.mimeType}
+                }),
                 messages: [
                     {
                         role: 'user',
