@@ -7,9 +7,11 @@
 NAMESPACE=demo-gitops
 LABEL_NAME=argocd-server
 
+# The Settings file to use, this is installed as a second extension
+SETTINGS=examples/settings/llama-stack/extension-basic-settings.js
+
 VERSION=$(node -p -e "require('./package.json').version")
 
-# yarn run build-dev
 yarn run build
 
 POD=$(oc get pod -l app.kubernetes.io/name=$LABEL_NAME -o jsonpath="{.items[0].metadata.name}" -n $NAMESPACE)
@@ -28,5 +30,5 @@ oc cp dist/resources/extensions-assistant/extension-assistant-bundle-${VERSION}.
 
 oc exec -it -n ${NAMESPACE} ${POD} -c argocd-server -- bash -c "mkdir -p /tmp/extensions/assistant-settings"
 
-oc cp examples/settings/llama-stack/basic-settings.js $NAMESPACE/$POD:/tmp/extensions/assistant-settings/extension-settings.js
+oc cp ${SETTINGS} $NAMESPACE/$POD:/tmp/extensions/assistant-settings/extension-settings.js
 

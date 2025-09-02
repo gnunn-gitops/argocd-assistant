@@ -1,8 +1,0 @@
-resources:
-- openshift-service-ca.yaml
-- serviceaccount-token.yaml
-- clusterrolebinding.yaml
-- groups.yaml
-- openshift-gitops.yaml
-- lightspeed-route.yaml
-- application.yaml
