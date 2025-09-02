@@ -26,7 +26,7 @@ export class LlamaStackProvider implements QueryProvider {
         });
 
         if (this._model == undefined) {
-            this._model = await this.getModel(client);
+            this._model = await this.getModel(client, context);
             if (this._model == undefined) {
                 return {success: false, error:{status:404, message:"No models are configured or available in LLamaStack"}};
             }
@@ -90,8 +90,11 @@ export class LlamaStackProvider implements QueryProvider {
      * @param client llama-stack client
      * @returns
      */
-    async getModel(client: LlamaStackClient): Promise<string> {
-        // Simple implementation to use first available model, needs to be configurable
+    async getModel(client: LlamaStackClient, context: QueryContext): Promise<string> {
+
+        if (context.settings.model != undefined) return context.settings.model;
+
+        // Simple implementation to use first available model if one wasn't configured
         const availableModels = (await client.models.list())
             .filter((model: any) =>
                 model.model_type === 'llm' &&

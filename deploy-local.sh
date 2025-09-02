@@ -25,3 +25,8 @@ oc exec -it -n ${NAMESPACE} ${POD} -c argocd-server -- bash -c "mkdir -p /tmp/ex
 echo "Copying to pod $POD"
 
 oc cp dist/resources/extensions-assistant/extension-assistant-bundle-${VERSION}.min.js $NAMESPACE/$POD:/tmp/extensions/resources/extension-assistant-bundle-${VERSION}.min.js
+
+oc exec -it -n ${NAMESPACE} ${POD} -c argocd-server -- bash -c "mkdir -p /tmp/extensions/assistant-settings"
+
+oc cp examples/settings/llama-stack/basic-settings.js $NAMESPACE/$POD:/tmp/extensions/assistant-settings/extension-settings.js
+

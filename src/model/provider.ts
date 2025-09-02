@@ -1,5 +1,31 @@
 import { Params } from "react-chatbotify";
 
+/**
+ * Settings can be attached to Window object as fake extension for the Argo CD
+ * Assistant to utilize. This is a bit of a hack to workaround the lack of a
+ * supported way to pass settings to Argo CD Extensions.
+ */
+export type AssistantSettings = {
+
+    /**
+     * The model that is to be used, if omitted the provider should do
+     * its best to use a sane default.
+     */
+    model?: string;
+
+    /**
+     * The QueryProvider to use, the chatbot will pass this to the
+     * ProviderFactory so the value here must match a provider defined
+     * in the factory.
+     */
+    provider: string;
+
+    /**
+     * Provider specific data, can be omitted if none needed.
+     */
+    data?: any;
+}
+
 export interface Logs {
 
     /**
@@ -60,6 +86,11 @@ export interface QueryContext {
      * the user.
      */
     get attachments(): Attachment[];
+
+    /**
+     * Any settings that were defined.
+     */
+    get settings(): AssistantSettings;
 }
 
 export type QueryError = {

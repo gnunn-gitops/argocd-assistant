@@ -5,7 +5,7 @@ import MarkedWrapper from "./components/MarkedWrapper";
 import {getLogs, hasLogs, MAX_LINES} from "./service/logs";
 import { getContainers, getResourceIdentifier, isAttachRequest, isCancelRequest, QueryContextImpl } from "./util/util";
 import { Events, LogEntry } from "./model/argocd";
-import { Attachment, AttachmentType, QueryProvider, QueryResponse } from "./model/provider";
+import { Attachment, AttachmentType, QueryProvider, QueryResponse, AssistantSettings } from "./model/provider";
 import { createProvider, Provider } from "./providers/providerFactory";
 
 import "./index.css"
@@ -56,6 +56,13 @@ const CHAT_SETTINGS: Settings = {
 }
 
 /**
+ * Add additional global item for settings
+ */
+declare global {
+  var argocdAssistantSettings: AssistantSettings;
+}
+
+/**
  * Styles used for chatbotify component, tried to match styles to
  * Argo CD colors.
  */
@@ -83,8 +90,12 @@ const CHAT_STYLES: Styles = {
  */
 export const Extension = (props: any) => {
 
+    const [settings] = React.useState<AssistantSettings>(globalThis.argocdAssistantSettings != undefined ? globalThis.argocdAssistantSettings: {provider: Provider.LLAMA_STACK});
+
     // Form used for guided conversation flow to load logs
-    const [provider] = React.useState<QueryProvider>(createProvider(Provider.LLAMA_STACK));
+    const [provider] = React.useState<QueryProvider>(createProvider(settings.provider as Provider));
+
+    console.log("Using provider: " + settings.provider);
 
     // Extract the resource and application passed to the extension
     const { resource, application } = props;
@@ -187,7 +198,7 @@ export const Extension = (props: any) => {
                 const conversationID = (CONVERSATION_ID_KEY in sessionStorage ) ? sessionStorage.getItem(CONVERSATION_ID_KEY) : undefined;
                 const data = (DATA_KEY in sessionStorage ) ? sessionStorage.getItem(DATA_KEY) : undefined;
 
-                const context = new QueryContextImpl(application, conversationID, data, attachments);
+                const context = new QueryContextImpl(application, conversationID, data, attachments, settings);
 
                 console.log(context);
 

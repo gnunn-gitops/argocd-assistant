@@ -1,5 +1,5 @@
 import { marked, Renderer } from "marked";
-import { Attachment, QueryContext } from "src/model/provider";
+import { AssistantSettings, Attachment, QueryContext } from "src/model/provider";
 
 export const HttpHeader = {
     CONTENT_TYPE: 'Content-Type',
@@ -33,19 +33,19 @@ export type Events = {
     items: any[]
 }
 
-
-
 export class QueryContextImpl implements QueryContext {
     private _application: any;
     private _conversationID: string;
     private _data: any;
     private _attachments: Attachment[];
+    private _settings: AssistantSettings;
 
-    constructor(application: any, conversationID: string, data: any, attachments: Attachment[]) {
+    constructor(application: any, conversationID: string, data: any, attachments: Attachment[], settings: AssistantSettings) {
         this._application = application;
         this._conversationID = conversationID;
         this._data = data;
         this._attachments = attachments;
+        this._settings = settings;
     }
 
     get application(): any {
@@ -62,6 +62,10 @@ export class QueryContextImpl implements QueryContext {
 
     get attachments(): Attachment[] {
         return this._attachments;
+    }
+
+    get settings(): AssistantSettings {
+        return this._settings;
     }
 }
 
