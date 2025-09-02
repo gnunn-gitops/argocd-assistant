@@ -81,7 +81,8 @@ const CHAT_STYLES: Styles = {
  */
 export const Extension = (props: any) => {
 
-    const provider: QueryProvider = createProvider(Provider.LLAMA_STACK);
+    // Form used for guided conversation flow to load logs
+    const [provider] = React.useState<QueryProvider>(createProvider(Provider.LLAMA_STACK));
 
     // Extract the resource and application passed to the extension
     const { resource, application } = props;

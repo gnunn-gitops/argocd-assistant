@@ -6,7 +6,11 @@ import { AgentConfig } from "llama-stack-client/resources/shared";
 import LlamaStackClient from 'llama-stack-client';
 import { TurnCreateParams, TurnResponseEventPayload } from "llama-stack-client/resources/agents/turn";
 
+const URL: string = 'https://' + location.host + "/extensions/assistant"
+
 export class LlamaStackProvider implements QueryProvider {
+
+    private _model: string;
 
     setContext(context: QueryContext) {
 
@@ -15,33 +19,20 @@ export class LlamaStackProvider implements QueryProvider {
     }
 
     async query(context: QueryContext, prompt:string, params: Params): Promise<QueryResponse> {
-        const url: string = 'https://' + location.host + "/extensions/assistant"
 
         const client = new LlamaStackClient({
-            baseURL: url,
+            baseURL: URL,
             defaultHeaders: this.getHeaders(context.application),
         });
 
-        // Simple implementation to use first available model, needs to be configurable
-        const availableModels = (await client.models.list())
-            .filter((model: any) =>
-                model.model_type === 'llm' &&
-                !model.identifier.includes('guard') &&
-                !model.identifier.includes('405')
-            )
-            .map((model: any) => model.identifier);
-
-        console.log(availableModels);
-
-        const selectedModel = availableModels[0];
-        console.log(`Using model: ${selectedModel}`);
-
-        if (availableModels.length === 0) {
-            console.log('No available models. Exiting.');
-            return {success: false, error:{status:404, message:"No models are available in LLamaStack"} }
+        if (this._model == undefined) {
+            this._model = await this.getModel(client);
+            if (this._model == undefined) {
+                return {success: false, error:{status:404, message:"No models are configured or available in LLamaStack"}};
+            }
         }
 
-        const agentConfig = this.getAgentConfig(selectedModel);
+        const agentConfig = this.getAgentConfig(this._model);
 
         const agent = await client.agents.create({ agent_config: agentConfig });
         const agentID = agent.agent_id
@@ -89,6 +80,34 @@ export class LlamaStackProvider implements QueryProvider {
         //console.log(text);
 
         return {success:true, conversationID: sessionID}
+    }
+
+    /**
+     * Fetches the model to use, right now defaults based on first
+     * available model that llama-stack returns but this needs to be
+     * made configurable.
+     *
+     * @param client llama-stack client
+     * @returns
+     */
+    async getModel(client: LlamaStackClient): Promise<string> {
+        // Simple implementation to use first available model, needs to be configurable
+        const availableModels = (await client.models.list())
+            .filter((model: any) =>
+                model.model_type === 'llm' &&
+                !model.identifier.includes('guard') &&
+                !model.identifier.includes('405')
+            )
+            .map((model: any) => model.identifier);
+
+        console.log(availableModels);
+
+        if (availableModels.length === 0) {
+            console.log('No available models. Exiting.');
+            return undefined;
+        } else {
+            return availableModels[0];
+        }
     }
 
     // TODO: This needs to be configurable
