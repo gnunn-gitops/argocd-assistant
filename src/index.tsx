@@ -8,6 +8,8 @@ import { Events, LogEntry } from "./model/argocd";
 import { Attachment, AttachmentType, QueryProvider, QueryResponse } from "./model/provider";
 import { createProvider, Provider } from "./providers/providerFactory";
 
+import "./index.css"
+
 // Where the chat is stored in session storage.
 const CHAT_HISTORY_KEY = "argocd-assistant-chat-history";
 
@@ -87,12 +89,16 @@ export const Extension = (props: any) => {
     // Extract the resource and application passed to the extension
     const { resource, application } = props;
 
-    // Configure chatbotify for MarkedDown rendering
+    // Configure chatbotify for MarkedDown rendering, we handle it directly
+    // using a wrapper since the default one does a poor job
     const pluginConfig = {
         autoConfig: true,
         markdownComponent: MarkedWrapper
     }
     const plugins = [MarkdownRenderer(pluginConfig)];
+
+    // Use the default renderer, doesn't work great IMHO
+    //const plugins = [MarkdownRenderer()];
 
     // Form used for guided conversation flow to load logs
     const [form, setForm] = React.useState({});

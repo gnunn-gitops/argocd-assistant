@@ -1,6 +1,9 @@
 .rcb-window-embedded {
     height: "100%"
 }
+.rcb-bot-message code {
+  font-family: monospace !important;
+}
 .rcb-bot-message ol {
     margin-top: -1.2em;
     margin-bottom: -1.2em;
@@ -22,6 +25,8 @@ ul {
 ul li {
   line-height: normal;
   white-space-collapse: collapse;
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
 }
 ul li p {
   line-height: normal;
@@ -32,6 +37,8 @@ ol {
 ol li {
   line-height: normal;
   white-space-collapse: collapse;
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
 }
 ol li p {
   line-height: normal;
