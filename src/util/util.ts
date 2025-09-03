@@ -75,10 +75,13 @@ export function getResourceIdentifier(resource: any): string {
     if (resource == undefined) return "Undefined";
     console.log(resource);
 
-    const namespace = resource.metadata.namespace != undefined?resource.metadata.namespace:"";
-    const version = resource.apiVersion !=undefined?resource.apiVersion.replace(/\//g, "-"):"";
+    const namespace = resource.metadata.namespace != undefined ? resource.metadata.namespace : "";
+    const version = resource.apiVersion != undefined ? resource.apiVersion.replace(/\//g, "-") : "";
+    const kind = resource.kind != undefined ? resource.kind : "";
 
-    return version + "-" + resource.metadata.kind + "-" + namespace + "-" + resource.metadata.name;
+    console.log("Kind:" + kind);
+
+    return version + "-" + kind + "-" + namespace + "-" + resource.metadata.name;
 }
 
 // Handle anything that is a pod or has a PodSpec template.
@@ -136,17 +139,17 @@ export function getHeaders(application: any, streaming: boolean): Headers {
         // Needed to get golang's reverse proxy that the Argo CD Extension proxy uses to
         // flush immediately.
         // https://github.com/golang/go/issues/41642
-        headers.append('Content-Length','-1');
+        headers.append('Content-Length', '-1');
     }
     return headers;
 }
 
 export function convertToHTML(markdown: string, render: Renderer): string {
     const sanitized = markdown.replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;");
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
 
     return marked(sanitized, { renderer: render, async: false });
 }
