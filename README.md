@@ -1,3 +1,5 @@
+*DEPRECATED*: This repo has moved to an Argo Labs project https://github.com/argoproj-labs/assistant-for-argocd
+
 ![alt text](https://raw.githubusercontent.com/gnunn-gitops/argocd-lightspeed/main/docs/img/lightspeed.png)
 
 <!--ARCADE EMBED START--><div style="position: relative; padding-bottom: calc(56.25% + 41px); height: 0; width: 100%;"><iframe src="https://demo.arcade.software/QIs0UjKxEX5K5eMgiZCX?embed&embed_mobile=tab&embed_desktop=inline&show_copy_link=true" title="OpenShit Lightspeed with Argo CD" frameborder="0" loading="lazy" webkitallowfullscreen mozallowfullscreen allowfullscreen allow="clipboard-write" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; color-scheme: light;" ></iframe></div><!--ARCADE EMBED END-->
